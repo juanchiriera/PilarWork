@@ -1,0 +1,14 @@
+sequenceDiagram
+    participant Usuario
+    participant Sistema
+    Usuario->>Sistema: Solicita registro
+    Sistema->>Usuario: Presenta formulario de registro
+    Usuario->>Sistema: Completa formulario (nombre, email, contraseña)
+    Sistema->>Sistema: Valida datos
+    alt Datos válidos
+        Sistema->>Sistema: Guarda datos de usuario
+        Sistema->>Sistema: Envía correo de confirmación
+        Sistema->>Usuario: Muestra mensaje de confirmación
+    else Datos inválidos
+        Sistema->>Usuario: Muestra mensaje de error
+    end
