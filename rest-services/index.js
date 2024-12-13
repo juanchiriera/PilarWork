@@ -1,9 +1,11 @@
 require('dotenv').config();
 const routes = require('./routes/routes');
-
 const express = require('express');
+const app = express ();
 const mongoose = require('mongoose');
 const mongoString = process.env.DATABASE_URL
+app.use(express.json());
+app.use('/api', routes)
 
 mongoose.connect(mongoString);
 const database = mongoose.connection
@@ -16,9 +18,6 @@ database.once('connected', () => {
     console.log('Database Connected');
 })
 
-const app = express ();
-app.use(express.json());
-app.use('/api', routes)
 
 app.get('/status', (request, response) => {
     const status = {
