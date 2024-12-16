@@ -8,8 +8,6 @@ router.post('/post', (req, res) => {
 })
 
 // RUTAS DE ESPACIOS
-router.post('/postespacio', async (req, res) => {
-
 router.post('/espacio', async (req, res) => {
     espacios = new espacios({
         name: req.body.name,
@@ -23,31 +21,31 @@ router.post('/espacio', async (req, res) => {
         res.status(200).json(espaciosToSave)
     }
     catch (error) {
-        res.status(400).json({message: error.message})
+        res.status(400).json({ message: error.message })
     }
 })
 
-router.put('/update/:id', async (req,res) => {
+router.put('/update/:id', async (req, res) => {
 
     let upid = req.params.idEspacio;
     let upname = req.body.name;
     let upquantity = req.body.quantity;
     let upavailable = req.body.available;
-    try{
-        await espacios.findOneAndUpdate({id:upid},{$set:{name:upname, quantity: upquantity, available: upavailable}},{new:true})
+    try {
+        await espacios.findOneAndUpdate({ id: upid }, { $set: { name: upname, quantity: upquantity, available: upavailable } }, { new: true })
         res.send("Updated")
-    }catch(error){
+    } catch (error) {
         res.send(error)
     }
-    })
+})
 
-router.delete('/delete/:id', async (req,res)=>{
+router.delete('/delete/:id', async (req, res) => {
 
     let delid = req.params.idEspacio;
-    try{
-        await espacios.findOneAndDelete({id:delid})
+    try {
+        await espacios.findOneAndDelete({ id: delid })
         res.send("Deleted")
-    }catch(error){
+    } catch (error) {
         res.send(error)
     }
-    })
+})
