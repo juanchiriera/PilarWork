@@ -10,6 +10,7 @@ router.post('/post', (req, res) => {
 // RUTAS DE ESPACIOS
 router.post('/postespacio', async (req, res) => {
 
+router.post('/espacio', async (req, res) => {
     espacios = new espacios({
         name: req.body.name,
         quantity: req.body.quantity,
