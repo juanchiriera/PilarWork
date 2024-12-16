@@ -12,6 +12,10 @@ const espacios = new mongoose.Schema({
     available: {
         required: true,
         type: Boolean
+    },
+    idEspacio: {
+        required: true,
+        type: Number
     }
 })
 
