@@ -13,10 +13,6 @@ const espacios = new mongoose.Schema({
         required: true,
         type: Boolean
     },
-    idEspacio: {
-        required: true,
-        type: Number
-    }
 })
 
 module.exports = mongoose.model('espacios', espacios)

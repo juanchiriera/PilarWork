@@ -7,13 +7,11 @@ router.post('/post', (req, res) => {
     res.send('Post API')
 })
 
-// RUTAS DE ESPACIOS
 router.post('/espacio', async (req, res) => {
     espacios = new espacios({
         name: req.body.name,
         quantity: req.body.quantity,
         available: req.body.available,
-        idEspacio: req.body.idEspacio
     })
 
     try {
@@ -25,9 +23,9 @@ router.post('/espacio', async (req, res) => {
     }
 })
 
-router.put('/update/:id', async (req, res) => {
+router.put('/espacio/:id', async (req, res) => {
 
-    let upid = req.params.idEspacio;
+    let upid = req.params._id;
     let upname = req.body.name;
     let upquantity = req.body.quantity;
     let upavailable = req.body.available;
@@ -39,9 +37,9 @@ router.put('/update/:id', async (req, res) => {
     }
 })
 
-router.delete('/delete/:id', async (req, res) => {
+router.delete('/espacio/:id', async (req, res) => {
 
-    let delid = req.params.idEspacio;
+    let delid = req.params._id;
     try {
         await espacios.findOneAndDelete({ id: delid })
         res.send("Deleted")
