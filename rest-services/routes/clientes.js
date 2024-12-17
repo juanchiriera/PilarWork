@@ -3,16 +3,12 @@ const router = express.Router()
 var clientes = require('../models/clientes');
 module.exports = router;
 
-router.post('/post', (req, res) => {
-    res.send('Post API')
-})
-
 router.post('/cliente', async (req, res) => {
     clientes = new clientes({
         name: req.body.name,
-        apellido: req.body.apellido,
+        surname: req.body.surname,
         mail: req.body.mail,
-        telefono: req.body.telefono
+        phone: req.body.phone
     })
 
     try {
@@ -20,19 +16,19 @@ router.post('/cliente', async (req, res) => {
         res.status(200).json(clientesToSave)
     }
     catch (error) {
-        res.status(400).json({ message: error.message })
+        res.send(error)
     }
 })
 
 router.put('/cliente/:id', async (req, res) => {
 
-    let upid = req.params._id;
+    let upid = req.params.ObjectId;
     let upname = req.body.name;
-    let upapellido = req.body.apellido;
+    let upsurname = req.body.surname;
     let upmail = req.body.mail;
-    let uptelefono = req.body.telefono;
+    let phone = req.body.phone;
     try {
-        await clientes.findOneAndUpdate({ id: upid }, { $set: { name: upname, apellido: upapellido, mail: upmail, telefono: uptelefono } }, { new: true })
+        await clientes.findOneAndUpdate({ id: upid }, { $set: { name: upname, surname: upsurname, mail: upmail, phone: phone } }, { new: true })
         res.send("Updated")
     } catch (error) {
         res.send(error)
@@ -41,7 +37,7 @@ router.put('/cliente/:id', async (req, res) => {
 
 router.delete('/cliente/:id', async (req, res) => {
 
-    let delid = req.params._id;
+    let delid = req.params.ObjectId;
     try {
         await clientes.findOneAndDelete({ id: delid })
         res.send("Deleted")

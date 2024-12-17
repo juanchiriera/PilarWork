@@ -3,10 +3,6 @@ const router = express.Router()
 var espacios = require('../models/espacios');
 module.exports = router;
 
-router.post('/post', (req, res) => {
-    res.send('Post API')
-})
-
 router.post('/espacio', async (req, res) => {
     espacios = new espacios({
         name: req.body.name,
@@ -25,7 +21,7 @@ router.post('/espacio', async (req, res) => {
 
 router.put('/espacio/:id', async (req, res) => {
 
-    let upid = req.params._id;
+    let upid = req.params.ObjectId;
     let upname = req.body.name;
     let upquantity = req.body.quantity;
     let upavailable = req.body.available;
@@ -39,7 +35,7 @@ router.put('/espacio/:id', async (req, res) => {
 
 router.delete('/espacio/:id', async (req, res) => {
 
-    let delid = req.params._id;
+    let delid = req.params.ObjectId;
     try {
         await espacios.findOneAndDelete({ id: delid })
         res.send("Deleted")
