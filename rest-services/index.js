@@ -1,11 +1,18 @@
 require('dotenv').config();
-const routes = require('./routes/espacios');
 const express = require('express');
 const app = express ();
 const mongoose = require('mongoose');
 const mongoString = process.env.DATABASE_URL
 app.use(express.json());
-app.use('/api', routes)
+
+//Registrar rutas
+const espaciosRoutes = require('./routes/espacios');
+const clienteRoutes = require('./routes/clientes');
+const elementosRoutes = require('./routes/elementos');
+
+app.use('/api', espaciosRoutes)
+app.use('/api', clienteRoutes)
+app.use('/api', elementosRoutes)
 
 mongoose.connect(mongoString);
 const database = mongoose.connection
