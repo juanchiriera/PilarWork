@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
-const espacios = require('./espacios');
 
-const elementos = new mongoose.Schema({
+const Espacio = new mongoose.Schema({
     name: {
         required: true,
         type: String
@@ -16,4 +15,4 @@ const elementos = new mongoose.Schema({
     },
 })
 
-module.exports = espacios.discriminator('elementos', elementos)
+module.exports = mongoose.model('Espacio', Espacio)

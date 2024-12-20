@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router()
-var elementos = require('../models/elementos');
+var elementos = require('../models/Elemento.js');
 module.exports = router;
 
 router.post('/elemento', async (req, res) => {

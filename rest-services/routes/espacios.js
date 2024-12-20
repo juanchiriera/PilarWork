@@ -1,18 +1,19 @@
 const express = require('express');
 const router = express.Router()
-var espacios = require('../models/espacios');
+const { Mongoose } = require('mongoose');
+const Espacio = require('../models/Espacio.js');
 module.exports = router;
 
 router.post('/espacio', async (req, res) => {
-    espacios = new espacios({
+    const espacio = new Espacio({
         name: req.body.name,
         quantity: req.body.quantity,
         available: req.body.available,
     })
 
     try {
-        const espaciosToSave = await espacios.save();
-        res.status(200).json(espaciosToSave)
+        const savedEspacio = await espacio.save();
+        res.status(200).json(savedEspacio)
     }
     catch (error) {
         res.status(400).json({ message: error.message })
@@ -21,12 +22,20 @@ router.post('/espacio', async (req, res) => {
 
 router.put('/espacio/:id', async (req, res) => {
 
-    let upid = req.params.ObjectId;
-    let upname = req.body.name;
-    let upquantity = req.body.quantity;
-    let upavailable = req.body.available;
+    let upid = req.params['id'];
+    let name = req.body.name;
+    let quantity = req.body.quantity;
+    let available = req.body.available;
     try {
-        await espacios.findOneAndUpdate({ id: upid }, { $set: { name: upname, quantity: upquantity, available: upavailable } }, { new: true })
+        await Espacio.findOneAndUpdate(
+            { id: upid },
+            { $set: 
+                { 
+                    name: name,
+                    quantity: quantity,
+                    available: available
+                } 
+            }, { new: true })
         res.send("Updated")
     } catch (error) {
         res.send(error)
@@ -35,10 +44,21 @@ router.put('/espacio/:id', async (req, res) => {
 
 router.delete('/espacio/:id', async (req, res) => {
 
-    let delid = req.params.ObjectId;
+    let delid = req.params['id'];
     try {
-        await espacios.findOneAndDelete({ id: delid })
+        await Espacio.findOneAndDelete({ id: delid })
         res.send("Deleted")
+    } catch (error) {
+        res.send(error)
+    }
+})
+
+router.get('/espacio/:id', async (req, res) => {
+    let id = req.params['id'];
+    try{
+        const ObjectId = require('mongoose').Types.ObjectId
+        let response = await Espacio.findById(new ObjectId(id))
+        res.send(response)
     } catch (error) {
         res.send(error)
     }
