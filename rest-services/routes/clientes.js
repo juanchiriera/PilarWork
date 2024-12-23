@@ -1,10 +1,9 @@
-const express = require('express');
-const router = express.Router()
-var clientes = require('../models/Cliente.js');
-module.exports = router;
+import { Router } from 'express';
+const router = Router()
+import { Cliente } from '../models/Cliente.js'
 
 router.post('/cliente', async (req, res) => {
-    clientes = new clientes({
+    Cliente = new Cliente({
         name: req.body.name,
         surname: req.body.surname,
         mail: req.body.mail,
@@ -12,7 +11,7 @@ router.post('/cliente', async (req, res) => {
     })
 
     try {
-        const clientesToSave = await clientes.save();
+        const clientesToSave = await Cliente.save();
         res.status(200).json(clientesToSave)
     }
     catch (error) {
@@ -28,7 +27,7 @@ router.put('/cliente/:id', async (req, res) => {
     let upmail = req.body.mail;
     let phone = req.body.phone;
     try {
-        await clientes.findOneAndUpdate({ id: upid }, { $set: { name: upname, surname: upsurname, mail: upmail, phone: phone } }, { new: true })
+        await Cliente.findOneAndUpdate({ id: upid }, { $set: { name: upname, surname: upsurname, mail: upmail, phone: phone } }, { new: true })
         res.send("Updated")
     } catch (error) {
         res.send(error)
@@ -39,9 +38,11 @@ router.delete('/cliente/:id', async (req, res) => {
 
     let delid = req.params.ObjectId;
     try {
-        await clientes.findOneAndDelete({ id: delid })
+        await Cliente.findOneAndDelete({ id: delid })
         res.send("Deleted")
     } catch (error) {
         res.send(error)
     }
 })
+
+export default router;

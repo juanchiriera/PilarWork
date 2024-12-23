@@ -1,17 +1,16 @@
-const express = require('express');
-const router = express.Router()
-var elementos = require('../models/Elemento.js');
-module.exports = router;
+import { Router } from 'express';
+const router = Router()
+import Elemento from '../models/Elemento.js'
 
 router.post('/elemento', async (req, res) => {
-    elementos = new elementos({
+    Elemento = new Elemento({
         name: req.body.name,
         quantity: req.body.quantity,
         available: req.body.available,
     })
 
     try {
-        const elementosToSave = await elementos.save();
+        const elementosToSave = await Elemento.save();
         res.status(200).json(elementosToSave)
     }
     catch (error) {
@@ -26,7 +25,7 @@ router.put('/elemento/:id', async (req, res) => {
     let upquantity = req.body.quantity;
     let upavailable = req.body.available;
     try {
-        await elementos.findOneAndUpdate({ id: upid }, { $set: { name: upname, quantity: upquantity, available: upavailable } }, { new: true })
+        await Elemento.findOneAndUpdate({ id: upid }, { $set: { name: upname, quantity: upquantity, available: upavailable } }, { new: true })
         res.send("Updated")
     } catch (error) {
         res.send(error)
@@ -37,9 +36,11 @@ router.delete('/elemento/:id', async (req, res) => {
 
     let delid = req.params.ObjectId;
     try {
-        await elementos.findOneAndDelete({ id: delid })
+        await Elemento.findOneAndDelete({ id: delid })
         res.send("Deleted")
     } catch (error) {
         res.send(error)
     }
 })
+
+export default router;

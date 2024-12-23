@@ -1,21 +1,22 @@
-require('dotenv').config();
-const express = require('express');
+import "dotenv/config.js"; 
+import express, { json } from 'express';
 const app = express ();
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 const mongoString = process.env.DATABASE_URL
-app.use(express.json());
+const { connect, connection } = mongoose;
+app.use(json());
 
 //Registrar rutas
-const espaciosRoutes = require('./routes/espacios');
-const clienteRoutes = require('./routes/clientes');
-const elementosRoutes = require('./routes/elementos');
+import espaciosRoutes from './routes/espacios.js';
+import clienteRoutes from './routes/clientes.js';
+import elementosRoutes from './routes/elementos.js';
 
 app.use('/api', espaciosRoutes)
 app.use('/api', clienteRoutes)
 app.use('/api', elementosRoutes)
 
-mongoose.connect(mongoString);
-const database = mongoose.connection
+connect(mongoString);
+const database = connection
 
 database.on('error', (error) => {
     console.log(error)

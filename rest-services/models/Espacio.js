@@ -1,6 +1,7 @@
-const mongoose = require('mongoose');
+import { mongoose, Schema } from 'mongoose';
+import Elemento from './Elemento.js';
 
-const Espacio = new mongoose.Schema({
+const Espacio = Schema({
     name: {
         required: true,
         type: String
@@ -13,6 +14,12 @@ const Espacio = new mongoose.Schema({
         required: true,
         type: Boolean
     },
+    elementos: {
+        required: false,
+        type: [Elemento]
+    }
 })
 
-module.exports = mongoose.model('Espacio', Espacio)
+export default mongoose.model('Espacio', Espacio)
+
+export { Espacio as Espacio }

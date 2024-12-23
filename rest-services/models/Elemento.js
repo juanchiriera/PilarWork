@@ -1,7 +1,6 @@
-const mongoose = require('mongoose');
-const espacios = require('./Espacio.js');
+import { Schema } from 'mongoose';
 
-const Elemento = new mongoose.Schema({
+const Elemento = new Schema({
     name: {
         required: true,
         type: String
@@ -16,4 +15,4 @@ const Elemento = new mongoose.Schema({
     },
 })
 
-module.exports = espacios.discriminator('elementos', Elemento)
+export default Elemento

@@ -1,8 +1,7 @@
-const express = require('express');
-const router = express.Router()
-const { Mongoose } = require('mongoose');
-const Espacio = require('../models/Espacio.js');
-module.exports = router;
+import { Router } from 'express';
+const router = Router()
+import Espacio from '../models/Espacio.js';
+import { Types } from 'mongoose';
 
 router.post('/espacio', async (req, res) => {
     const espacio = new Espacio({
@@ -56,10 +55,12 @@ router.delete('/espacio/:id', async (req, res) => {
 router.get('/espacio/:id', async (req, res) => {
     let id = req.params['id'];
     try{
-        const ObjectId = require('mongoose').Types.ObjectId
+        const ObjectId = Types.ObjectId
         let response = await Espacio.findById(new ObjectId(id))
         res.send(response)
     } catch (error) {
         res.send(error)
     }
 })
+
+export default router;
