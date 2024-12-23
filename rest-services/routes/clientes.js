@@ -21,13 +21,13 @@ router.post('/cliente', async (req, res) => {
 
 router.put('/cliente/:id', async (req, res) => {
 
-    let upid = req.params.ObjectId;
+    let upid = req.params['id'];
     let upname = req.body.name;
     let upsurname = req.body.surname;
     let upmail = req.body.mail;
     let phone = req.body.phone;
     try {
-        await Cliente.findOneAndUpdate({ id: upid }, { $set: { name: upname, surname: upsurname, mail: upmail, phone: phone } }, { new: true })
+        await Cliente.findOneAndUpdate({ _id: upid }, { $set: { name: upname, surname: upsurname, mail: upmail, phone: phone } }, { new: true })
         res.send("Updated")
     } catch (error) {
         res.send(error)
@@ -36,10 +36,21 @@ router.put('/cliente/:id', async (req, res) => {
 
 router.delete('/cliente/:id', async (req, res) => {
 
-    let delid = req.params.ObjectId;
+    let delid = req.params['id'];
     try {
-        await Cliente.findOneAndDelete({ id: delid })
+        await Cliente.findOneAndDelete({ _id: delid })
         res.send("Deleted")
+    } catch (error) {
+        res.send(error)
+    }
+})
+
+router.get('/cliente/:id', async (req, res) => {
+    let id = req.params['id'];
+    try{
+        const ObjectId = Types.ObjectId
+        let response = await Cliente.findById(new ObjectId(id))
+        res.send(response)
     } catch (error) {
         res.send(error)
     }

@@ -1,25 +1,22 @@
-import { mongoose, Schema } from 'mongoose';
-import Elemento from './Elemento.js';
+import mongoose, { Schema } from 'mongoose';
 
-const Espacio = Schema({
+const EspacioSchema = new Schema({
     name: {
         required: true,
-        type: String
+        type: String,
     },
     quantity: {
         required: true,
-        type: Number
+        type: Number,
     },
     available: {
-        required: true,
-        type: Boolean
-    },
-    elementos: {
         required: false,
-        type: [Elemento]
-    }
-})
+        type: Boolean,
+    },
+    elementos: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Elemento',
+    }],
+});
 
-export default mongoose.model('Espacio', Espacio)
-
-export { Espacio as Espacio }
+export default mongoose.model('Espacio', EspacioSchema);

@@ -20,12 +20,12 @@ router.post('/elemento', async (req, res) => {
 
 router.put('/elemento/:id', async (req, res) => {
 
-    let upid = req.params.ObjectId;
+    let upid = req.params['id'];
     let upname = req.body.name;
     let upquantity = req.body.quantity;
     let upavailable = req.body.available;
     try {
-        await Elemento.findOneAndUpdate({ id: upid }, { $set: { name: upname, quantity: upquantity, available: upavailable } }, { new: true })
+        await Elemento.findOneAndUpdate({ _id: upid }, { $set: { name: upname, quantity: upquantity, available: upavailable } }, { new: true })
         res.send("Updated")
     } catch (error) {
         res.send(error)
@@ -34,10 +34,21 @@ router.put('/elemento/:id', async (req, res) => {
 
 router.delete('/elemento/:id', async (req, res) => {
 
-    let delid = req.params.ObjectId;
+    let delid = req.params['id'];
     try {
-        await Elemento.findOneAndDelete({ id: delid })
+        await Elemento.findOneAndDelete({ _id: delid })
         res.send("Deleted")
+    } catch (error) {
+        res.send(error)
+    }
+})
+
+router.get('/elemento/:id', async (req, res) => {
+    let id = req.params['id'];
+    try{
+        const ObjectId = Types.ObjectId
+        let response = await Elemento.findById(new ObjectId(id))
+        res.send(response)
     } catch (error) {
         res.send(error)
     }

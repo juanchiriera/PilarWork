@@ -1,18 +1,18 @@
-import { Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
-const Elemento = new Schema({
+const ElementoSchema = new Schema({
     name: {
         required: true,
-        type: String
+        type: String,
     },
     quantity: {
         required: true,
-        type: Number
+        type: Number,
     },
     available: {
         required: true,
-        type: Boolean
+        type: Boolean,
     },
-})
+});
 
-export default Elemento
+export default mongoose.model('Elemento', ElementoSchema);
