@@ -94,13 +94,47 @@ router.delete('/espacio/:id', async (req, res) => {
 
 router.get('/espacio/:id', async (req, res) => {
     let id = req.params['id'];
-    try{
-        const ObjectId = Types.ObjectId
-        let response = await Espacio.findById(new ObjectId(id)).populate('elementos');
-        res.send(response)
+    try {
+
+        if (!Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid ID format" });
+        }
+        const espacio = await Espacio.findById(id).populate('elementos');
+
+        // Si el espacio no existe, devuelve un error
+        if (!espacio) {
+            return res.status(404).json({ message: "Espacio not found" });
+        }
+
+        // Formatea el espacio para devolver el `id` en lugar de `_id`
+        const formattedEspacio = {
+            id: espacio._id, // Cambia _id a id
+            name: espacio.name,
+            quantity: espacio.quantity,
+            available: espacio.available,
+            elementos: espacio.elementos.map((elemento) => ({
+                id: elemento._id,
+                name: elemento.name,
+                quantity: elemento.quantity,
+                available: elemento.available,
+            })),
+        };
+
+        // Envía el espacio formateado
+        res.status(200).json(formattedEspacio);
     } catch (error) {
-        res.send(error)
+        res.status(500).json({ message: "Internal server error", error: error.message });
     }
-})
+});
+
+router.get('/espacios', async (req, res) => {
+    try {
+        const espacios = await Espacio.find().populate('elementos');
+        res.status(200).json(espacios);
+    } catch (error) {
+        console.error('Error al obtener los espacios:', error);
+        res.status(500).json({ message: 'Error interno del servidor', error });
+    }
+});
 
 export default router;

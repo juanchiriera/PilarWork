@@ -1,10 +1,18 @@
 import "dotenv/config.js"; 
 import express, { json } from 'express';
+import cors from 'cors';
 const app = express ();
 import mongoose from 'mongoose';
 const mongoString = process.env.DATABASE_URL
 const { connect, connection } = mongoose;
 app.use(json());
+
+const corsSetup = {
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+};
+app.use(cors(corsSetup));
 
 //Registrar rutas
 import espaciosRoutes from './routes/espacios.js';
