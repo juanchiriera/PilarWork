@@ -1,16 +1,16 @@
-import { Show, SimpleShowLayout, TextField, NumberField, BooleanField, ArrayField, Datagrid} from 'react-admin';
+import { Show, SimpleShowLayout, TextField, ArrayField, Datagrid } from 'react-admin';
 
-const EspaciosShow = (props: any) => (
-    <Show {...props}>
+const EspaciosShow = () => (
+    <Show>
         <SimpleShowLayout>
             <TextField source="name" />
-            <NumberField source="quantity" />
-            <BooleanField source="available" />
+            <TextField source="quantity" />
+            <TextField source="available" />
             <ArrayField source="elementos">
                 <Datagrid>
                     <TextField source="name" />
-                    <NumberField source="quantity" />
-                    <BooleanField source="available" />
+                    <TextField source="quantity" />
+                    <TextField source="available" />
                 </Datagrid>
             </ArrayField>
         </SimpleShowLayout>

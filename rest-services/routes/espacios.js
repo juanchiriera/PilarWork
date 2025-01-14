@@ -94,11 +94,20 @@ router.delete('/espacios/:id', async (req, res) => {
 
 router.get('/espacios/:id', async (req, res) => {
     try {
-        const espacio = await Espacio.findById(req.params.id);
+        const espacio = await Espacio.findById(req.params.id).populate('elementos');
         if (!espacio) {
             return res.status(404).json({ message: 'Espacio no encontrado' });
         }
-        const formattedEspacio = { id: espacio._id, ...espacio.toObject() };
+
+        const formattedEspacio = {
+            id: espacio._id, 
+            ...espacio.toObject(),
+            elementos: espacio.elementos.map((elemento) => ({
+                id: elemento._id,
+                ...elemento.toObject(),
+            })),
+        };
+
         res.status(200).json(formattedEspacio);
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener el espacio', error });
