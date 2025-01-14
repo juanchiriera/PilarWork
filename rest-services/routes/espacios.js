@@ -4,7 +4,7 @@ import Espacio from '../models/Espacio.js';
 import Elemento from '../models/Elemento.js';
 import { Types } from 'mongoose';
 
-router.post('/espacio', async (req, res) => {
+router.post('/espacios', async (req, res) => {
     try {
         const elementosData = req.body.elementos; // Array de objetos para elementos
         const elementosIds = [];
@@ -41,7 +41,7 @@ router.post('/espacio', async (req, res) => {
     }
 });
 
-router.put('/espacio/:id', async (req, res) => {
+router.put('/espacios/:id', async (req, res) => {
     try {
         const espacioId = req.params.id;
         const updatedData = req.body;
@@ -81,7 +81,7 @@ router.put('/espacio/:id', async (req, res) => {
     }
 });
 
-router.delete('/espacio/:id', async (req, res) => {
+router.delete('/espacios/:id', async (req, res) => {
 
     let delid = req.params['id'];
     try {
@@ -92,48 +92,41 @@ router.delete('/espacio/:id', async (req, res) => {
     }
 })
 
-router.get('/espacio/:id', async (req, res) => {
-    let id = req.params['id'];
+router.get('/espacios/:id', async (req, res) => {
     try {
-
-        if (!Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ message: "Invalid ID format" });
-        }
-        const espacio = await Espacio.findById(id).populate('elementos');
-
-        // Si el espacio no existe, devuelve un error
+        const espacio = await Espacio.findById(req.params.id);
         if (!espacio) {
-            return res.status(404).json({ message: "Espacio not found" });
+            return res.status(404).json({ message: 'Espacio no encontrado' });
         }
-
-        // Formatea el espacio para devolver el `id` en lugar de `_id`
-        const formattedEspacio = {
-            id: espacio._id, // Cambia _id a id
-            name: espacio.name,
-            quantity: espacio.quantity,
-            available: espacio.available,
-            elementos: espacio.elementos.map((elemento) => ({
-                id: elemento._id,
-                name: elemento.name,
-                quantity: elemento.quantity,
-                available: elemento.available,
-            })),
-        };
-
-        // Envía el espacio formateado
+        const formattedEspacio = { id: espacio._id, ...espacio.toObject() };
         res.status(200).json(formattedEspacio);
     } catch (error) {
-        res.status(500).json({ message: "Internal server error", error: error.message });
+        res.status(500).json({ message: 'Error al obtener el espacio', error });
     }
 });
 
 router.get('/espacios', async (req, res) => {
     try {
-        const espacios = await Espacio.find().populate('elementos');
-        res.status(200).json(espacios);
+        const range = req.query.range ? JSON.parse(req.query.range) : [0, 9];
+        const start = range[0];
+        const end = range[1];
+
+        const espacios = await Espacio.find()
+            .skip(start)
+            .limit(end - start + 1);
+
+        const total = await Espacio.countDocuments();
+
+        const espaciosConId = espacios.map(espacio => ({
+            id: espacio._id,
+            ...espacio.toObject(),
+        }));
+
+        res.setHeader('Content-Range', `items ${start}-${end}/${total}`);
+
+        res.status(200).json(espaciosConId);
     } catch (error) {
-        console.error('Error al obtener los espacios:', error);
-        res.status(500).json({ message: 'Error interno del servidor', error });
+        res.status(500).json({ message: error.message });
     }
 });
 
