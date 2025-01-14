@@ -1,20 +1,20 @@
-import { Show, SimpleShowLayout, TextField, ArrayField, Datagrid } from 'react-admin';
+import { Show, SimpleShowLayout, TextField, ArrayField, Datagrid} from 'react-admin';
 
-const EspaciosShow = () => (
-    <Show>
+const espaciosShow = (props: any) => ( 
+    <Show {...props}>
         <SimpleShowLayout>
-            <TextField source="name" />
-            <TextField source="quantity" />
-            <TextField source="available" />
-            <ArrayField source="elementos">
+            <TextField source="name" label="Nombre" />
+            <TextField source="quantity" label="Quantity" />
+            <TextField source="available" label="Disponible" />
+            <ArrayField source="elementos" label="Elementos">
                 <Datagrid>
-                    <TextField source="name" />
-                    <TextField source="quantity" />
-                    <TextField source="available" />
+                    <TextField source="name" label="Nombre"/>
+                    <TextField source="quantity"/>
+                    <TextField source="available" label="Disponible"/>
                 </Datagrid>
             </ArrayField>
         </SimpleShowLayout>
     </Show>
 );
 
-export default EspaciosShow;
+export default espaciosShow;

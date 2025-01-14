@@ -2,38 +2,32 @@ import { Router } from 'express';
 const router = Router()
 import Espacio from '../models/Espacio.js';
 import Elemento from '../models/Elemento.js';
-import { Types } from 'mongoose';
 
 router.post('/espacios', async (req, res) => {
     try {
-        const elementosData = req.body.elementos; // Array de objetos para elementos
-        const elementosIds = [];
+        const newEspacio = new Espacio(req.body);
 
-        // Verificar que los elementos existan en el body
-        if (elementosData && elementosData.length > 0) {
-            for (const elemento of elementosData) {
+        if (req.body.elementos && req.body.elementos.length > 0) {
+            newEspacio.elementos = [];
+
+            for (const elementoData of req.body.elementos) {
                 const newElemento = new Elemento({
-                    name: elemento.name,
-                    quantity: elemento.quantity,
-                    available: elemento.available,
+                    name: elementoData.name,
+                    quantity: elementoData.quantity,
+                    available: elementoData.available,
                 });
 
                 const savedElemento = await newElemento.save();
-                elementosIds.push(savedElemento._id); // Guardar el ID del elemento
+                newEspacio.elementos.push(savedElemento._id);
             }
         }
 
-        const espacio = new Espacio({
-            name: req.body.name,
-            quantity: req.body.quantity,
-            available: req.body.available,
-            elementos: elementosIds,
-        });
+        const savedEspacio = await newEspacio.save();
 
-        const savedEspacio = await espacio.save();
+        const populatedEspacio = await Espacio.findById(savedEspacio._id).populate('elementos').lean();
 
-        // Populate para incluir los datos completos de los elementos
-        const populatedEspacio = await Espacio.findById(savedEspacio._id).populate('elementos');
+        populatedEspacio.id = populatedEspacio._id;
+        delete populatedEspacio._id;
 
         res.status(200).json(populatedEspacio);
     } catch (error) {
@@ -45,6 +39,7 @@ router.put('/espacios/:id', async (req, res) => {
     try {
         const espacioId = req.params.id;
         const updatedData = req.body;
+
         const updatedEspacio = await Espacio.findByIdAndUpdate(
             espacioId, 
             {
@@ -54,6 +49,10 @@ router.put('/espacios/:id', async (req, res) => {
             }, 
             { new: true }
         );
+
+        if (!updatedEspacio) {
+            return res.status(404).json({ message: 'Espacio no encontrado' });
+        }
 
         if (updatedData.elementos && updatedData.elementos.length > 0) {
             updatedEspacio.elementos = [];
@@ -75,7 +74,16 @@ router.put('/espacios/:id', async (req, res) => {
 
         const populatedEspacio = await Espacio.findById(savedUpdatedEspacio._id).populate('elementos');
 
-        res.status(200).json(populatedEspacio);
+        const formattedResponse = {
+            id: populatedEspacio._id.toString(),
+            ...populatedEspacio.toObject(),
+            elementos: populatedEspacio.elementos.map((elemento) => ({
+                id: elemento._id.toString(),
+                ...elemento.toObject(),
+            })),
+        };
+
+        res.status(200).json({ data: formattedResponse });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
