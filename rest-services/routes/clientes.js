@@ -1,59 +1,109 @@
 import { Router } from 'express';
 const router = Router()
-import { Cliente } from '../models/Cliente.js'
+import Cliente from '../models/Cliente.js'
 
-router.post('/cliente', async (req, res) => {
-    Cliente = new Cliente({
-        name: req.body.name,
-        surname: req.body.surname,
-        mail: req.body.mail,
-        phone: req.body.phone
-    })
-
+router.post('/clientes', async (req, res) => {
     try {
-        const clientesToSave = await Cliente.save();
-        res.status(200).json(clientesToSave)
+        const cliente = new Cliente(req.body);
+        const savedCliente = await cliente.save();
+        res.status(201).json({
+            data: {
+                id: savedCliente._id,
+                ...savedCliente.toObject(),
+            },
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-    catch (error) {
-        res.send(error)
-    }
-})
+});
 
-router.put('/cliente/:id', async (req, res) => {
-
-    let upid = req.params['id'];
-    let upname = req.body.name;
-    let upsurname = req.body.surname;
-    let upmail = req.body.mail;
-    let phone = req.body.phone;
+router.put('/clientes/:id', async (req, res) => {
     try {
-        await Cliente.findOneAndUpdate({ _id: upid }, { $set: { name: upname, surname: upsurname, mail: upmail, phone: phone } }, { new: true })
-        res.send("Updated")
+        const updatedData = req.body;
+
+        const updatedCliente = await Cliente.findByIdAndUpdate(
+            req.params.id,
+            {
+                name: updatedData.name,
+                surname: updatedData.surname,
+                mail: updatedData.mail,
+                phone: updatedData.phone,
+            },
+            { new: true }
+        ).lean();
+
+        if (!updatedCliente) {
+            return res.status(404).json({ message: "Cliente no encontrado" });
+        }
+
+        updatedCliente.id = updatedCliente._id;
+        delete updatedCliente._id;
+
+        res.status(200).json({ data: updatedCliente });
     } catch (error) {
-        res.send(error)
+        res.status(400).json({ message: error.message });
     }
-})
+});
 
-router.delete('/cliente/:id', async (req, res) => {
-
-    let delid = req.params['id'];
+router.delete('/clientes/:id', async (req, res) => {
     try {
-        await Cliente.findOneAndDelete({ _id: delid })
-        res.send("Deleted")
-    } catch (error) {
-        res.send(error)
-    }
-})
+        const deletedCliente = await Cliente.findByIdAndDelete(req.params.id).lean();
 
-router.get('/cliente/:id', async (req, res) => {
-    let id = req.params['id'];
-    try{
-        const ObjectId = Types.ObjectId
-        let response = await Cliente.findById(new ObjectId(id))
-        res.send(response)
+        if (!deletedCliente) {
+            return res.status(404).json({ message: "Cliente no encontrado" });
+        }
+
+        deletedCliente.id = deletedCliente._id;
+        delete deletedCliente._id;
+
+        res.status(200).json({ data: deletedCliente });
     } catch (error) {
-        res.send(error)
+        res.status(400).json({ message: error.message });
     }
-})
+});
+
+router.get('/clientes/:id', async (req, res) => {
+    try {
+        const cliente = await Cliente.findById(req.params.id);
+        if (!cliente) {
+            return res.status(404).json({ message: 'Cliente no encontrado' });
+        }
+
+        const formattedCliente = {
+            id: cliente._id,
+            ...cliente.toObject(),
+        };
+
+        delete formattedCliente._id;
+
+        res.status(200).json({ data: formattedCliente });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.get('/clientes', async (req, res) => {
+    try {
+        const range = req.query.range ? JSON.parse(req.query.range) : [0, 9];
+        const start = range[0];
+        const end = range[1];
+
+        const clientes = await Cliente.find()
+            .skip(start)
+            .limit(end - start + 1);
+
+        const total = await Cliente.countDocuments();
+
+        const formattedClientes = clientes.map(cliente => ({
+            id: cliente._id,
+            ...cliente.toObject(),
+        }));
+
+        res.setHeader('Content-Range', `clientes ${start}-${end}/${total}`);
+        res.status(200).json(formattedClientes);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
 export default router;

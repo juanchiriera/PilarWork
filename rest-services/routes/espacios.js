@@ -115,7 +115,8 @@ router.get('/espacios/:id', async (req, res) => {
                 ...elemento.toObject(),
             })),
         };
-
+        delete formattedEspacio._id;
+        
         res.status(200).json(formattedEspacio);
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener el espacio', error });
