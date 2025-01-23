@@ -1,4 +1,4 @@
-import { Show, SimpleShowLayout, TextField, ArrayField, Datagrid, List, ListGuesser, SimpleList} from 'react-admin';
+import { Show, SimpleShowLayout, TextField, ArrayField, Datagrid} from 'react-admin';
 
 const espaciosShow = (props: any) => ( 
     <Show {...props}>

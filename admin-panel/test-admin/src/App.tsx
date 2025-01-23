@@ -12,6 +12,8 @@ import clienteCreate from './pages/clientes/clientes-create'
 import elementosList from './pages/elementos/elementos-list';
 import elementoEdit from './pages/elementos/elemento-edit';
 import elementosShow from './pages/elementos/elemento-show';
+import reservasList from './pages/reservas/reserva-list';
+import reservasShow from './pages/reservas/reserva-show';
 
 
 export const App = () => (
@@ -19,6 +21,7 @@ export const App = () => (
         <Resource name="espacios" list={espaciosList} show= {espacioShow} edit= {espacioEdit} create={espacioCreate}/>
         <Resource name="clientes" list={clientesList} show={clientesShow} edit={clienteEdit} create={clienteCreate}/>
         <Resource name="elementos" list={elementosList} edit={elementoEdit} show={elementosShow}/>
+        <Resource name="reservas" list={reservasList} show={reservasShow}/>
     </Admin>
 );
 

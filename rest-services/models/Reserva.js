@@ -1,36 +1,36 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, {Schema} from "mongoose";
 
-const EspacioSchema = new Schema({
-    name: {
+const ReservaSchema = new Schema({
+    personas: [{
         required: true,
         type: String,
-    },
-    quantity: {
+    }],
+    fechaInicio: {
         required: true,
-        type: Number,
+        type: Date,
     },
-    available: {
-        required: false,
-        type: Boolean,
+    fechaFin: {
+        required: true,
+        type: Date,
     },
     elementos: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Elemento',
     }],
-    reservas: [{
+    clientes: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Reserva',
-    }],
+        ref: 'Cliente',
+    },
 });
 
 // Add a virtual field 'id' that gets the value from '_id'
-EspacioSchema.virtual('id').get(function () {
+ReservaSchema.virtual('id').get(function () {
     return this._id.toHexString();
 });
 
 // Ensure virtual fields are serialized
-EspacioSchema.set('toJSON', {
+ReservaSchema.set('toJSON', {
     virtuals: true,
 });
 
-export default mongoose.model('Espacio', EspacioSchema);
+export default mongoose.model('Reserva', ReservaSchema);
