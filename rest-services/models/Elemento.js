@@ -15,4 +15,14 @@ const ElementoSchema = new Schema({
     },
 });
 
+// Add a virtual field 'id' that gets the value from '_id'
+ElementoSchema.virtual('id').get(function () {
+    return this._id.toHexString();
+});
+
+// Ensure virtual fields are serialized
+ElementoSchema.set('toJSON', {
+    virtuals: true,
+});
+
 export default mongoose.model('Elemento', ElementoSchema);
