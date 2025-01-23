@@ -66,11 +66,6 @@ router.get('/elementos', async (req, res) => {
 
         const total = await Elemento.countDocuments();
 
-        // const elementosConId = elementos.map(elemento => ({
-        //     id: elemento._id,
-        //     ...elemento.toObject(),
-        // }));
-
         res.setHeader('Content-Range', `items ${start}-${end}/${total}`);
 
         res.status(200).json(elementos);

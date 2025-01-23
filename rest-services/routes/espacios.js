@@ -24,10 +24,7 @@ router.post('/espacios', async (req, res) => {
 
         const savedEspacio = await newEspacio.save();
 
-        const populatedEspacio = await Espacio.findById(savedEspacio._id).populate('elementos').lean();
-
-        populatedEspacio.id = populatedEspacio._id;
-        delete populatedEspacio._id;
+        const populatedEspacio = await Espacio.findById(savedEspacio._id).populate('elementos');
 
         res.status(200).json(populatedEspacio);
     } catch (error) {
@@ -74,16 +71,7 @@ router.put('/espacios/:id', async (req, res) => {
 
         const populatedEspacio = await Espacio.findById(savedUpdatedEspacio._id).populate('elementos');
 
-        const formattedResponse = {
-            id: populatedEspacio._id.toString(),
-            ...populatedEspacio.toObject(),
-            elementos: populatedEspacio.elementos.map((elemento) => ({
-                id: elemento._id.toString(),
-                ...elemento.toObject(),
-            })),
-        };
-
-        res.status(200).json({ data: formattedResponse });
+        res.status(200).json( populatedEspacio );
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -106,18 +94,8 @@ router.get('/espacios/:id', async (req, res) => {
         if (!espacio) {
             return res.status(404).json({ message: 'Espacio no encontrado' });
         }
-
-        const formattedEspacio = {
-            id: espacio._id, 
-            ...espacio.toObject(),
-            elementos: espacio.elementos.map((elemento) => ({
-                id: elemento._id,
-                ...elemento.toObject(),
-            })),
-        };
-        delete formattedEspacio._id;
         
-        res.status(200).json(formattedEspacio);
+        res.status(200).json(espacio);
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener el espacio', error });
     }
@@ -135,14 +113,9 @@ router.get('/espacios', async (req, res) => {
 
         const total = await Espacio.countDocuments();
 
-        const espaciosConId = espacios.map(espacio => ({
-            id: espacio._id,
-            ...espacio.toObject(),
-        }));
-
         res.setHeader('Content-Range', `items ${start}-${end}/${total}`);
 
-        res.status(200).json(espaciosConId);
+        res.status(200).json(espacios);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

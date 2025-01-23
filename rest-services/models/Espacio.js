@@ -19,4 +19,14 @@ const EspacioSchema = new Schema({
     }],
 });
 
+// Add a virtual field 'id' that gets the value from '_id'
+EspacioSchema.virtual('id').get(function () {
+    return this._id.toHexString();
+});
+
+// Ensure virtual fields are serialized
+EspacioSchema.set('toJSON', {
+    virtuals: true,
+});
+
 export default mongoose.model('Espacio', EspacioSchema);

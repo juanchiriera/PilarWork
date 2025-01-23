@@ -3,15 +3,16 @@ const router = Router()
 import Cliente from '../models/Cliente.js'
 
 router.post('/clientes', async (req, res) => {
+       Cliente = new Cliente({
+            name: req.body.name,
+            surname: req.body.surname,
+            email: req.body.email,
+            phone: req.body.phone,
+        })
+
     try {
-        const cliente = new Cliente(req.body);
-        const savedCliente = await cliente.save();
-        res.status(201).json({
-            data: {
-                id: savedCliente._id,
-                ...savedCliente.toObject(),
-            },
-        });
+        const clienteToSave = await cliente.save();
+        res.status(200).json(clienteToSave);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -30,16 +31,13 @@ router.put('/clientes/:id', async (req, res) => {
                 phone: updatedData.phone,
             },
             { new: true }
-        ).lean();
+        )
 
         if (!updatedCliente) {
             return res.status(404).json({ message: "Cliente no encontrado" });
         }
 
-        updatedCliente.id = updatedCliente._id;
-        delete updatedCliente._id;
-
-        res.status(200).json({ data: updatedCliente });
+        res.status(200).json(updatedCliente);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -47,16 +45,13 @@ router.put('/clientes/:id', async (req, res) => {
 
 router.delete('/clientes/:id', async (req, res) => {
     try {
-        const deletedCliente = await Cliente.findByIdAndDelete(req.params.id).lean();
+        const deletedCliente = await Cliente.findByIdAndDelete(req.params.id);
 
         if (!deletedCliente) {
             return res.status(404).json({ message: "Cliente no encontrado" });
         }
 
-        deletedCliente.id = deletedCliente._id;
-        delete deletedCliente._id;
-
-        res.status(200).json({ data: deletedCliente });
+        res.status(200).json(deletedCliente);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -69,14 +64,7 @@ router.get('/clientes/:id', async (req, res) => {
             return res.status(404).json({ message: 'Cliente no encontrado' });
         }
 
-        const formattedCliente = {
-            id: cliente._id,
-            ...cliente.toObject(),
-        };
-
-        delete formattedCliente._id;
-
-        res.status(200).json({ data: formattedCliente });
+        res.status(200).json(cliente);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -94,13 +82,8 @@ router.get('/clientes', async (req, res) => {
 
         const total = await Cliente.countDocuments();
 
-        const formattedClientes = clientes.map(cliente => ({
-            id: cliente._id,
-            ...cliente.toObject(),
-        }));
-
         res.setHeader('Content-Range', `clientes ${start}-${end}/${total}`);
-        res.status(200).json(formattedClientes);
+        res.status(200).json(clientes);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

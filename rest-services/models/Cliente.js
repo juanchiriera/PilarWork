@@ -19,4 +19,14 @@ const ClienteSchema = new Schema({
     },
 })
 
+// Add a virtual field 'id' that gets the value from '_id'
+ClienteSchema.virtual('id').get(function () {
+    return this._id.toHexString();
+});
+
+// Ensure virtual fields are serialized
+ClienteSchema.set('toJSON', {
+    virtuals: true,
+});
+
 export default mongoose.model('Cliente', ClienteSchema);

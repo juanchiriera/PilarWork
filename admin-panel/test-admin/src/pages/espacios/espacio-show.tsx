@@ -7,14 +7,11 @@ const espaciosShow = (props: any) => (
             <TextField source="quantity" label="Quantity" />
             <TextField source="available" label="Disponible" />
             <ArrayField source="elementos" label="Elementos">
-                <SimpleList
-                    primaryText={elemento => elemento.name}
-                    secondaryText={elemento => elemento.quantity>1 ? `Cantidad: ${elemento.quantity}` : ""}
-                    tertiaryText={elemento => elemento.available ? "Disponible" : "No disponible"}
-                    // cli
-                    // rowClick={(record: any) => record.canEdit ? "edit" : "show"}
-                    // rowSx={record => ({ backgroundColor: record.nb_views >= 500 ? '#efe' : 'white' })}
-                />
+                <Datagrid bulkActionButtons={false} rowClick={false}>
+                    <TextField source="name" />
+                    <TextField source="quantity" />
+                    <TextField source="available" />
+                </Datagrid>
             </ArrayField>
         </SimpleShowLayout>
     </Show>
