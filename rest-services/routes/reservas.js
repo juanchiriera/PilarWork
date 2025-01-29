@@ -1,6 +1,7 @@
 import { Router } from 'express';
 const router = Router()
 import Reserva from '../models/Reserva.js';
+import Espacio from '../models/Espacio.js';
 
 router.post('/reservas', async (req, res) => {
     try {
@@ -9,6 +10,12 @@ router.post('/reservas', async (req, res) => {
         const savedReserva = await newReserva.save();
 
         const populatedReserva = await Reserva.findById(savedReserva._id).populate('elementos').populate('clientes');
+
+        await Espacio.findByIdAndUpdate(
+            Espacio._id,
+            { $push: { reservas: savedReserva._id } },
+            { new: true }
+        );
 
         res.status(200).json(populatedReserva);
     } catch (error) {
