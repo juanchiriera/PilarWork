@@ -15,6 +15,9 @@ class EspaciosPageState extends State<EspaciosPage> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+  DateTime? _rangeStart;
+  DateTime? _rangeEnd;
+  bool _isRangeSelected = false;
 
   @override
   void initState() {
@@ -103,70 +106,133 @@ class EspaciosPageState extends State<EspaciosPage> {
 }
 
  void _showCalendarDialog(BuildContext context, String espacioId) {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text("Selecciona una fecha"),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: TableCalendar(
-            firstDay: DateTime.utc(2025, 1, 1),
-            lastDay: DateTime.utc(2026, 12, 31),
-            focusedDay: _focusedDay,
-            calendarFormat: _calendarFormat,
-            selectedDayPredicate: (day) {
-              return isSameDay(_selectedDay, day);
-            },
-            onDaySelected: (selectedDay, focusedDay) async {
-              setState(() {
-                _selectedDay = selectedDay;
-                _focusedDay = focusedDay;
-              });
-              final personas = await _showPersonasInputDialog(context);
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Row(
+                children: [
+                  Text(_isRangeSelected ? 'Seleccione fechas' : 'Seleccione fecha'),
+                  Spacer(),
+                   Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('cambiar seleccion'),
+                      IconButton(
+                        icon: Icon(_isRangeSelected ? Icons.calendar_month : Icons.calendar_today),
+                        onPressed: () {
+                          setState(() {
+                            _isRangeSelected = !_isRangeSelected;
+                            _rangeStart = null;
+                            _rangeEnd = null;
+                          });
+                        },
+                      ),
+                    ],
+                   ),
+                ],
+              ),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: TableCalendar(
+                  firstDay: DateTime.now(),
+                  lastDay: DateTime.now().add(Duration(days: 365)),
+                  focusedDay: _focusedDay,
+                  calendarFormat: _calendarFormat,
+                  rangeStartDay: _rangeStart,
+                  rangeEndDay: _rangeEnd,
+                  startingDayOfWeek: StartingDayOfWeek.monday,
+                  calendarStyle: CalendarStyle(
+                    rangeHighlightColor: const Color.fromARGB(96, 238, 238, 238),
+                    withinRangeTextStyle: TextStyle(color: Colors.black),
+                    withinRangeDecoration: BoxDecoration(
+                      color: Colors.grey[100],
+                    ),
+                  ),
+                  selectedDayPredicate: (day) {
+                    return isSameDay(_selectedDay, day);
+                  },
+                  onDaySelected: (selectedDay, focusedDay) {
+                    setState(() {
+                      if (_isRangeSelected) {
+                        if (_rangeStart == null) {
+                          _rangeStart = selectedDay;
+                          _rangeEnd = null;
+                        } else if (_rangeStart != null && _rangeEnd == null && !selectedDay.isBefore(_rangeStart!)) {
+                          _rangeEnd = selectedDay;
+                        } else {
+                          _rangeStart = selectedDay;
+                          _rangeEnd = null;
+                        }
+                      } else {
+                        _selectedDay = selectedDay;
+                        _rangeStart = selectedDay;
+                        _rangeEnd = selectedDay;
+                      }
+                      _focusedDay = focusedDay;
+                    });
+                  },
+                  onFormatChanged: (format) {
+                    setState(() {
+                      _calendarFormat = format;
+                    });
+                  },
+                  onPageChanged: (focusedDay) {
+                    _focusedDay = focusedDay;
+                  },
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('Cancelar'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    if ((_isRangeSelected && _rangeStart != null && _rangeEnd != null) ||
+                        (!_isRangeSelected && _rangeStart != null)) {
+                      // Get personas input
+                      final personas = await _showPersonasInputDialog(context);
+                      
+                      if (personas == null || personas.isEmpty) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Debe ingresar los nombres')),
+                          );
+                        }
+                        return;
+                      }
 
-              if (!mounted) return;
-
-              if (personas == null || personas.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Debe ingresar los nombres de las personas')),
-                );
-                return;
-              }
-              final fechaInicio = selectedDay;
-              final fechaFin = selectedDay.add(Duration(days: 1)); // Example: 1-day reservation
-              createReserva(espacioId, fechaInicio, fechaFin, personas, context); // Pass personas to createReserva
-
-              Navigator.of(context).pop();
-            },
-            onFormatChanged: (format) {
-              setState(() {
-                _calendarFormat = format;
-              });
-            },
-            onPageChanged: (focusedDay) {
-              _focusedDay = focusedDay;
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text("Cerrar", style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      );
-    },
-  );
-}
+                      Navigator.of(context).pop();
+                      
+                      if (context.mounted) {
+                        createReserva(
+                          espacioId,
+                          _rangeStart!,
+                          _rangeEnd ?? _rangeStart!,
+                          personas,
+                          context,
+                        );
+                      }
+                    }
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Espacios Disponibles'),
+        title: Text('Espacios Existentes'),
       ),
       body: espacios.isEmpty
           ? Center(child: CircularProgressIndicator())
