@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart';
 
 class EspaciosPage extends StatefulWidget {
   const EspaciosPage({super.key});
@@ -12,12 +13,12 @@ class EspaciosPage extends StatefulWidget {
 
 class EspaciosPageState extends State<EspaciosPage> {
   List<dynamic> espacios = [];
-  CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
+  bool _isRangeSelected = false;
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
-  bool _isRangeSelected = false;
+  DateTime? _selectedDay;
+
 
   @override
   void initState() {
@@ -36,38 +37,430 @@ class EspaciosPageState extends State<EspaciosPage> {
     }
   }
 
-  Future<String?> _showPersonasInputDialog(BuildContext context) async {
-  String? personas;
-  await showDialog(
+ void _showCalendarDialog(BuildContext context, String espacioId) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Dialog(
+              insetPadding: const EdgeInsets.all(10),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.95,
+                  maxHeight: MediaQuery.of(context).size.height * 0.8,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildCalendarHeader(setState),
+                      const Divider(),
+                      Expanded(
+                        child: TableCalendar(
+                        firstDay: DateTime.now(),
+                        lastDay: DateTime.now().add(const Duration(days: 365)),
+                        focusedDay: _focusedDay,
+                        selectedDayPredicate: (day) => !_isRangeSelected && _isSameDay(_selectedDay, day),
+                        rangeStartDay: _isRangeSelected ? _rangeStart : null,
+                        rangeEndDay: _isRangeSelected ? _rangeEnd : null,
+                        calendarStyle: CalendarStyle(
+                          selectedDecoration: BoxDecoration(
+                            color: Colors.blue,
+                            shape: BoxShape.circle,
+                          ),
+                          rangeHighlightColor: Colors.blue[100]!,
+                          rangeStartDecoration: BoxDecoration(
+                            color: Colors.blue,
+                            shape: BoxShape.circle,
+                          ),
+                          rangeEndDecoration: BoxDecoration(
+                            color: Colors.blue,
+                            shape: BoxShape.circle,
+                          ),
+                          withinRangeDecoration: BoxDecoration(
+                            color: Colors.blue[50],
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        onDaySelected: (selectedDay, focusedDay) {
+                          setState(() {
+                            if (_isRangeSelected) {
+                              if (_rangeStart == null || (_rangeStart != null && _rangeEnd != null)) {
+                                _rangeStart = selectedDay;
+                                _rangeEnd = null;
+                              } else {
+                                _rangeEnd = selectedDay;
+                              }
+                            } else {
+                              _selectedDay = selectedDay;
+                            }
+                            _focusedDay = focusedDay;
+                          });
+                          },
+                          onPageChanged: (focusedDay) {
+                            setState(() => _focusedDay = focusedDay);
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildSelectedDatesPreview(),
+                      const SizedBox(height: 16),
+                      _buildDialogActions(context, espacioId),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildSelectedDatesPreview() {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: _isRangeSelected
+          ? _buildRangePreview()
+          : _buildSingleDatePreview(),
+    );
+  }
+
+  Widget _buildSingleDatePreview() {
+    return Text(
+      _selectedDay != null
+          ? 'Fecha seleccionada: ${DateFormat('dd/MM/yyyy').format(_selectedDay!)}'
+          : 'Seleccione una fecha',
+      style: TextStyle(
+        color: Colors.blue[800],
+        fontWeight: FontWeight.w500
+      ),
+    );
+  }
+
+  Widget _buildRangePreview() {
+    return Column(
+      children: [
+        if (_rangeStart != null)
+          Text(
+            'Desde: ${DateFormat('dd/MM/yyyy').format(_rangeStart!)}',
+            style: TextStyle(color: Colors.blue[800]),
+          ),
+        if (_rangeEnd != null)
+          Text(
+            'Hasta: ${DateFormat('dd/MM/yyyy').format(_rangeEnd!)}',
+            style: TextStyle(color: Colors.blue[800]),
+          ),
+        if (_rangeStart == null || _rangeEnd == null)
+          Text(
+            'Seleccione el rango de fechas',
+            style: TextStyle(color: Colors.grey[600]),
+          ),
+      ],
+    );
+  }
+
+  bool _isSameDay(DateTime? a, DateTime? b) {
+    if (a == null || b == null) return false;
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+Widget _buildCalendarHeader(StateSetter setState) {
+  return Row(
+    children: [
+      Text(
+        'Seleccionar Fechas',
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+      Spacer(),
+      Text('Rango'),
+      Switch(
+        value: _isRangeSelected,
+        onChanged: (value) {
+          setState(() {
+            _isRangeSelected = value;
+            _rangeStart = null;
+            _rangeEnd = null;
+          });
+        },
+      ),
+    ],
+  );
+}
+
+Widget _buildDialogActions(BuildContext context, String espacioId) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: Text('Cancelar'),
+      ),
+      SizedBox(width: 10),
+      ElevatedButton(
+        onPressed: () => _handleDateConfirmation(context, espacioId),
+        child: Text('Confirmar'),
+      ),
+    ],
+  );
+}
+
+void _handleDateConfirmation(BuildContext context, String espacioId) {
+  // Validar selección de fechas
+  if (_isRangeSelected) {
+    if (_rangeStart == null || _rangeEnd == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Seleccione un rango válido')),
+      );
+      return;
+    }
+    
+    // Para rangos: usar fechas completas sin hora
+    final fechaInicio = DateTime(
+      _rangeStart!.year,
+      _rangeStart!.month,
+      _rangeStart!.day,
+    );
+    
+    final fechaFin = DateTime(
+      _rangeEnd!.year,
+      _rangeEnd!.month,
+      _rangeEnd!.day,
+      23,
+      59,
+      59,
+    );
+
+    Navigator.pop(context);
+    _showPersonasDialog(context, espacioId, fechaInicio, fechaFin);
+  } else {
+    if (_selectedDay == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Seleccione una fecha')),
+      );
+      return;
+    }
+
+    // Para fecha única: mostrar selector de hora
+    Navigator.pop(context); // Cerrar diálogo de calendario primero
+    _showTimeDialog(context, espacioId, _selectedDay!);
+  }
+}
+
+void _showTimeDialog(BuildContext context, String espacioId, DateTime selectedDate) async {
+  final startController = TextEditingController();
+  final endController = TextEditingController();
+  final formKey = GlobalKey<FormState>();
+
+  final result = await showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: Text('Quien va a venir'),
-        content: TextField(
-          decoration: InputDecoration(hintText: 'Ingrese los nombres'),
-          onChanged: (value) {
-            personas = value;
-          },
+        title: const Text('Seleccionar horario'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildTimeInputField(
+                label: 'Hora de inicio',
+                controller: startController,
+                example: 'Ej: 09:00',
+              ),
+              const SizedBox(height: 20),
+              _buildTimeInputField(
+                label: 'Hora de fin',
+                controller: endController,
+                example: 'Ej: 17:30',
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Formato de 24 horas (HH:mm)',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 12
+                ),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text('Cancelar'),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
           ),
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
+              if (formKey.currentState!.validate()) {
+                Navigator.pop(context, {
+                  'start': startController.text,
+                  'end': endController.text
+                });
+              }
             },
-            child: Text('Aceptar'),
+            child: const Text('OK'),
           ),
         ],
       );
     },
   );
-  return personas;
+
+  if (result != null && context.mounted) {
+    final startTime = _parseTime(result['start']);
+    final endTime = _parseTime(result['end']);
+
+    if (startTime == null || endTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Formato de hora inválido')),
+      );
+      return;
+    }
+
+    if (endTime.hour < startTime.hour || 
+       (endTime.hour == startTime.hour && endTime.minute <= startTime.minute)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('La hora final debe ser posterior')),
+      );
+      return;
+    }
+
+    final fechaInicio = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+      startTime.hour,
+      startTime.minute,
+    );
+
+    final fechaFin = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+      endTime.hour,
+      endTime.minute,
+    );
+
+    _showPersonasDialog(context, espacioId, fechaInicio, fechaFin);
+  }
 }
+
+Widget _buildTimeInputField({
+  required String label,
+  required TextEditingController controller,
+  required String example,
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(label),
+      const SizedBox(height: 5),
+      SizedBox(
+        width: 120,
+        child: TextFormField(
+          controller: controller,
+          decoration: InputDecoration(
+            hintText: example,
+            border: const OutlineInputBorder(),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) return 'Campo requerido';
+            if (_parseTime(value) == null) return 'Formato inválido';
+            return null;
+          },
+        ),
+      ),
+    ],
+  );
+}
+
+TimeOfDay? _parseTime(String timeString) {
+  try {
+    final parts = timeString.split(':');
+    if (parts.length != 2) return null;
+    
+    final hour = int.parse(parts[0]);
+    final minute = int.parse(parts[1]);
+    
+    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+    
+    return TimeOfDay(hour: hour, minute: minute);
+  } catch (e) {
+    return null;
+  }
+}
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Espacios Existentes'),
+      ),
+      body: espacios.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+            itemCount: espacios.length,
+            itemBuilder: (context, index) {
+              final espacio = espacios[index];
+              return Card(
+            margin: EdgeInsets.all(10),
+            child: ListTile(
+              title: Text(espacio['name'], style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text(espacio['description'] ?? 'Sin descripción'),
+                onTap: () {
+                _showCalendarDialog(context, espacio['_id']);
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+void _showPersonasDialog(BuildContext context, String espacioId, DateTime fechaInicio, DateTime fechaFin) async {
+    final personas = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        String input = '';
+        return AlertDialog(
+          title: const Text('Quien va a venir'),
+          content: TextField(
+            decoration: const InputDecoration(
+              hintText: 'Nombres separados por comas',
+            ),
+            onChanged: (value) => input = value,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, input),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (personas != null && personas.isNotEmpty && context.mounted) {
+      createReserva(
+        espacioId,
+        fechaInicio,
+        fechaFin,
+        personas,
+        context,
+      );
+    } else if (personas != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Debe ingresar al menos un nombre')),
+      );
+    }
+  }
 
   Future<void> createReserva(
   String espacioId,
@@ -101,157 +494,6 @@ class EspaciosPageState extends State<EspaciosPage> {
   } else {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Error al crear la reserva')),
-    );
-  }
-}
-
- void _showCalendarDialog(BuildContext context, String espacioId) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Row(
-                children: [
-                  Text(_isRangeSelected ? 'Seleccione fechas' : 'Seleccione fecha'),
-                  Spacer(),
-                   Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('cambiar seleccion'),
-                      IconButton(
-                        icon: Icon(_isRangeSelected ? Icons.calendar_month : Icons.calendar_today),
-                        onPressed: () {
-                          setState(() {
-                            _isRangeSelected = !_isRangeSelected;
-                            _rangeStart = null;
-                            _rangeEnd = null;
-                          });
-                        },
-                      ),
-                    ],
-                   ),
-                ],
-              ),
-              content: SizedBox(
-                width: double.maxFinite,
-                child: TableCalendar(
-                  firstDay: DateTime.now(),
-                  lastDay: DateTime.now().add(Duration(days: 365)),
-                  focusedDay: _focusedDay,
-                  calendarFormat: _calendarFormat,
-                  rangeStartDay: _rangeStart,
-                  rangeEndDay: _rangeEnd,
-                  startingDayOfWeek: StartingDayOfWeek.monday,
-                  calendarStyle: CalendarStyle(
-                    rangeHighlightColor: const Color.fromARGB(96, 238, 238, 238),
-                    withinRangeTextStyle: TextStyle(color: Colors.black),
-                    withinRangeDecoration: BoxDecoration(
-                      color: Colors.grey[100],
-                    ),
-                  ),
-                  selectedDayPredicate: (day) {
-                    return isSameDay(_selectedDay, day);
-                  },
-                  onDaySelected: (selectedDay, focusedDay) {
-                    setState(() {
-                      if (_isRangeSelected) {
-                        if (_rangeStart == null) {
-                          _rangeStart = selectedDay;
-                          _rangeEnd = null;
-                        } else if (_rangeStart != null && _rangeEnd == null && !selectedDay.isBefore(_rangeStart!)) {
-                          _rangeEnd = selectedDay;
-                        } else {
-                          _rangeStart = selectedDay;
-                          _rangeEnd = null;
-                        }
-                      } else {
-                        _selectedDay = selectedDay;
-                        _rangeStart = selectedDay;
-                        _rangeEnd = selectedDay;
-                      }
-                      _focusedDay = focusedDay;
-                    });
-                  },
-                  onFormatChanged: (format) {
-                    setState(() {
-                      _calendarFormat = format;
-                    });
-                  },
-                  onPageChanged: (focusedDay) {
-                    _focusedDay = focusedDay;
-                  },
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text('Cancelar'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    if ((_isRangeSelected && _rangeStart != null && _rangeEnd != null) ||
-                        (!_isRangeSelected && _rangeStart != null)) {
-                      // Get personas input
-                      final personas = await _showPersonasInputDialog(context);
-                      
-                      if (personas == null || personas.isEmpty) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Debe ingresar los nombres')),
-                          );
-                        }
-                        return;
-                      }
-
-                      Navigator.of(context).pop();
-                      
-                      if (context.mounted) {
-                        createReserva(
-                          espacioId,
-                          _rangeStart!,
-                          _rangeEnd ?? _rangeStart!,
-                          personas,
-                          context,
-                        );
-                      }
-                    }
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Espacios Existentes'),
-      ),
-      body: espacios.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-            itemCount: espacios.length,
-            itemBuilder: (context, index) {
-              final espacio = espacios[index];
-              return Card(
-            margin: EdgeInsets.all(10),
-            child: ListTile(
-              title: Text(espacio['name'], style: TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text(espacio['description'] ?? 'Sin descripción'),
-                onTap: () {
-                _showCalendarDialog(context, espacio['_id']);
-              },
-            ),
-          );
-        },
-      ),
     );
   }
 }
