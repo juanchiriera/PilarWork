@@ -23,13 +23,13 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             ElevatedButton(
-            onPressed: () {
-                 Navigator.push(
+              onPressed: () {
+                Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => EspaciosPage()),
                 );
               },
-            child: Text('Espacios'),
+              child: Text('Espacios'),
             ),
           ],
         ),
