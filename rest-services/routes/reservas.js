@@ -46,45 +46,77 @@ router.put('/reservas/:id', async (req, res) => {
 router.delete('/reservas/:id', async (req, res) => {
     let delid = req.params['id'];
     try {
-        await Reserva.findByIdAndDelete({_id: delid});
+        await Reserva.findByIdAndDelete({ _id: delid });
         res.send("Deleted")
     } catch (error) {
         res.send(error)
     }
 });
 
-router.get('/reservas/:id', async (req, res) => {
-    
-    try {
-     const reserva = await Reserva.findById(req.params.id).populate('elementos').populate('clientes');
-            if (!reserva) {
-                return res.status(404).json({ message: 'Reserva no encontrado' });
+
+router.get('/reservas', async (req, res) => {
+    const { fechaInicio, fechaFin, fechaSeleccionada } = req.query;
+    if (fechaSeleccionada) {
+        Reserva.find({ fecha: fechaSeleccionada }).populate('elementos').populate('clientes').exec((err, reservas) => {
+            if (err) {
+                res.status(500).json({ message: err.message });
             }
-            
-            res.status(200).json(reserva);
-        } catch (error) {
-            res.status(500).json({ message: 'Error al obtener la reserva', error });
+            res.status(200).json(reservas);
+        });
+    } else {
+
+
+        if (!fechaInicio || !fechaFin) {
+            return res.status(400).json({ message: 'fechaInicio and fechaFin are required' });
         }
+
+        try {
+            const reservas = await Reserva.find({
+                fecha: {
+                    $gte: new Date(fechaInicio),
+                    $lte: new Date(fechaFin)
+                }
+            }).populate('elementos').populate('clientes');
+
+            res.status(200).json(reservas);
+        } catch (error) {
+            res.status(400).json({ message: error.message });
+        }
+    }
+});
+
+router.get('/reservas/:id', async (req, res) => {
+
+    try {
+        const reserva = await Reserva.findById(req.params.id).populate('elementos').populate('clientes');
+        if (!reserva) {
+            return res.status(404).json({ message: 'Reserva no encontrado' });
+        }
+
+        res.status(200).json(reserva);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener la reserva', error });
+    }
 });
 
 router.get('/reservas', async (req, res) => {
-    try{
+    try {
         const range = req.query.range ? JSON.parse(req.query.range) : [0, 9];
-           const start = range[0];
-           const end = range[1];
-   
-           const reservas = await Reserva.find()
-               .skip(start)
-               .limit(end - start + 1);
-   
-           const total = await Reserva.countDocuments();
-   
-           res.setHeader('Content-Range', `items ${start}-${end}/${total}`);
-   
-           res.status(200).json(reservas);
-       } catch (error) {
-           res.status(500).json({ message: error.message });
-       }
-   });
+        const start = range[0];
+        const end = range[1];
+
+        const reservas = await Reserva.find()
+            .skip(start)
+            .limit(end - start + 1);
+
+        const total = await Reserva.countDocuments();
+
+        res.setHeader('Content-Range', `items ${start}-${end}/${total}`);
+
+        res.status(200).json(reservas);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
 export default router;
