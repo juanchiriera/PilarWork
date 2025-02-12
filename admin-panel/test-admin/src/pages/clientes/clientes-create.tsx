@@ -1,6 +1,6 @@
 import { Create, SimpleForm, TextInput} from "react-admin";
 
-const espacioCreate = () => (
+const clienteCreate = () => (
     <Create>
         <SimpleForm>
             <TextInput source="name" label="Nombre" />
@@ -11,4 +11,4 @@ const espacioCreate = () => (
     </Create>
 );
 
-export default espacioCreate;
+export default clienteCreate;

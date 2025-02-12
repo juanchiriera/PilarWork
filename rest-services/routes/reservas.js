@@ -72,7 +72,11 @@ router.get('/reservas', async (req, res) => {
 
         try {
             const reservas = await Reserva.find({
-                fecha: {
+                fechaInicio: {
+                    $gte: new Date(fechaInicio),
+                    $lte: new Date(fechaFin)
+                },
+                fechaFin: {
                     $gte: new Date(fechaInicio),
                     $lte: new Date(fechaFin)
                 }
