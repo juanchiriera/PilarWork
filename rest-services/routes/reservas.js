@@ -89,6 +89,24 @@ router.get('/reservas', async (req, res) => {
     }
 });
 
+router.get('/reservas/check', async (req, res) => {
+    const { elementoId, fechaInicio, fechaFin } = req.query;
+    
+    const reservas = await Reserva.find({
+        elementos: elementoId,
+        fechaInicio: {
+            $gte: new Date(fechaInicio),
+            $lte: new Date(fechaFin)
+        },
+        fechaFin: {
+            $gte: new Date(fechaInicio),
+            $lte: new Date(fechaFin)
+        }
+    });
+
+    return res.json({ disponible: reservas.length === 0 });
+});
+
 router.get('/reservas/:id', async (req, res) => {
 
     try {

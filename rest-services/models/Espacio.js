@@ -17,10 +17,6 @@ const EspacioSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Elemento',
     }],
-    reservas: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Reserva',
-    }],
 });
 
 // Add a virtual field 'id' that gets the value from '_id'

@@ -1,19 +1,21 @@
 import { useEffect, useState } from 'react';
+import { ShowButton, CreateButton, useRefresh, DeleteWithConfirmButton  } from 'react-admin';
 import axios from 'axios';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
-import { Badge, Box, Modal, Typography, Paper, CircularProgress } from '@mui/material';
+import { Badge, Box, Modal, Typography, Paper, CircularProgress, Stack  } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 dayjs.extend(isBetween);
 
+
 interface Reservation {
     id: string;
-    espacio: string;
+    personas: string[];
     fechaInicio: string;
     fechaFin: string;
-    personas: string[];
-    estado: string;
+    cliente: string;
+    elementos: string[];
 }
 
 const CalendarTab = () => {
@@ -23,6 +25,7 @@ const CalendarTab = () => {
     const [error, setError] = useState('');
     const [modalOpen, setModalOpen] = useState(false);
     const [currentMonth, setCurrentMonth] = useState<Dayjs>(dayjs());
+    const refresh = useRefresh();
 
     useEffect(() => {
         const fetchReservations = async () => {
@@ -48,8 +51,9 @@ const CalendarTab = () => {
         fetchReservations();
     }, [currentMonth]);
 
-    const handleMonthChange = (date: Dayjs) => {
-        setCurrentMonth(date);
+    const handleDeleteSuccess = (id: string) => {
+        setReservations(prev => prev.filter(r => r.id !== id));
+        refresh();
     };
 
     const getReservationsForDate = (date: Dayjs) => {
@@ -76,6 +80,8 @@ const CalendarTab = () => {
             setModalOpen(true);
         };
 
+    if (loading) return <CircularProgress sx={{ margin: 'auto' }} />;
+    if (error) return <Typography color="error">{error}</Typography>;
         return (
             <Badge
                 key={day.toString()}
@@ -111,14 +117,22 @@ const CalendarTab = () => {
         <Box sx={{ 
             maxWidth: 800, 
             width: '100%',
-            height: '70vh',
             margin: 'auto',
             padding: 3
         }}>
+            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                <CreateButton 
+                    resource="reservas"
+                    sx={{ 
+                        backgroundColor: '#4CAF50',
+                        '&:hover': { backgroundColor: '#45a049' }
+                    }}
+                />
+            </Box>
+
             <DateCalendar
                 value={currentMonth}
-                onChange={handleMonthChange}
-                onMonthChange={handleMonthChange}
+                onMonthChange={setCurrentMonth}
                 slots={{ day: CustomDay }}
                 sx={{
                     '& .MuiDateCalendar-root': {
@@ -140,38 +154,63 @@ const CalendarTab = () => {
                     overflow: 'auto'
                 }}>
                     <Typography variant="h6" gutterBottom>
-                        Reservaciones para {selectedDate?.format('DD/MM/YYYY')}
+                        Reservas del {selectedDate?.format('DD/MM/YYYY')}
                     </Typography>
                     
-                    {selectedDate && getReservationsForDate(selectedDate).map(reservation => (
-                        <Box key={reservation.id} sx={{ 
-                            mb: 2,
-                            p: 2,
-                            border: '1px solid #e0e0e0',
-                            borderRadius: 1
-                        }}>
-                            <Typography variant="body1">
-                                <strong>Espacio:</strong> {reservation.espacio}
-                            </Typography>
-                            <Typography variant="body2">
-                                <strong>Horario:</strong> {dayjs(reservation.fechaInicio).format('HH:mm')} - {dayjs(reservation.fechaFin).format('HH:mm')}
-                            </Typography>
-                            <Typography variant="body2">
-                                <strong>Personas:</strong> {reservation.personas.join(', ')}
-                            </Typography>
-                            <Typography variant="body2" color={
-                                reservation.estado === 'confirmada' ? 'green' : 'orange'
-                            }>
-                                <strong>Estado:</strong> {reservation.estado}
-                            </Typography>
-                        </Box>
-                    ))}
+                    {selectedDate && reservations
+                        .filter(r => dayjs(r.fechaInicio).isSame(selectedDate, 'day'))
+                        .map(reservation => (
+                            <Paper 
+                                key={reservation.id}
+                                sx={{ 
+                                    mb: 2,
+                                    p: 2,
+                                    border: '1px solid #e0e0e0',
+                                    borderRadius: 1,
+                                    position: 'relative'
+                                }}
+                            >
+                                <Stack direction="column" spacing={1}>
+                                    <Typography variant="body2">
+                                        <strong>Horario:</strong> {dayjs(reservation.fechaInicio).format('HH:mm')} - {dayjs(reservation.fechaFin).format('HH:mm')}
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        <strong>Personas:</strong> {reservation.personas.join(', ')}
+                                    </Typography>
+                                    
+                                    <Stack 
+                                        direction="row" 
+                                        spacing={1} 
+                                        sx={{ mt: 1, justifyContent: 'flex-end' }}
+                                    >
+                                        <ShowButton 
+                                            resource="reservas"
+                                            record={reservation}
+                                            sx={{ 
+                                                color: '#2196F3',
+                                                '&:hover': { backgroundColor: '#e3f2fd' }
+                                            }}
+                                        />
+                                        
+                                        <DeleteWithConfirmButton
+                                            resource="reservas"
+                                            record={reservation}
+                                            confirmTitle="Eliminar reserva"
+                                            confirmContent="¿Estás seguro de eliminar esta reserva?"
+                                            mutationOptions={{
+                                                onSuccess: () => handleDeleteSuccess(reservation.id)
+                                            }}
+                                        />
+                                    </Stack>
+                                </Stack>
+                            </Paper>
+                        ))}
                     
                     {selectedDate && getReservationsForDate(selectedDate).length === 0 && (
                         <Typography variant="body2" color="textSecondary">
                             No hay reservaciones para este día
                         </Typography>
-                    )}
+                        )}
                 </Paper>
             </Modal>
         </Box>
