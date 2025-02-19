@@ -115,9 +115,9 @@ const CalendarTab = () => {
 
     return (
         <Box sx={{ 
-            maxWidth: 800, 
+            // maxWidth: 800, 
             width: '100%',
-            margin: 'auto',
+            // margin: 'auto',
             padding: 3
         }}>
             <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
@@ -137,8 +137,9 @@ const CalendarTab = () => {
                 sx={{
                     '& .MuiDateCalendar-root': {
                         width: '100%',
-                        height: '100%'
+                        height: '100%',
                     }
+
                 }}
             />
             

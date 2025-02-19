@@ -90,7 +90,7 @@ router.delete('/espacios/:id', async (req, res) => {
 
 router.get('/espacios/:id', async (req, res) => {
     try {
-        const espacio = await Espacio.findById(req.params.id).populate('elementos');
+        const espacio = await Espacio.findById(req.params.id).populate('elementos', 'name');
         if (!espacio) {
             return res.status(404).json({ message: 'Espacio no encontrado' });
         }

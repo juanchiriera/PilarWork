@@ -1,10 +1,9 @@
 import { Create, SimpleForm, SelectInput, DateTimeInput, SelectArrayInput, useNotify, useRedirect, required, useGetList, TextInput} from 'react-admin';
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 
-// Extender Day.js con el plugin necesario
 dayjs.extend(isSameOrBefore);
 
 interface Elemento {
@@ -30,16 +29,18 @@ export const ReservaCreate = () => {
     const notify = useNotify();
     const redirect = useRedirect();
     const [elementos, setElementos] = useState<Elemento[]>([]);
+    const [selectedEspacioId, setSelectedEspacioId] = useState<string>();
     
     const { data: espacios, isLoading: loadingEspacios } = useGetList<Espacio>('espacios');
-
-    const handleEspacioChange = (value: string) => {
-        if (value) {
-            axios.get<Espacio>(`http://localhost:3000/api/espacios/${value}`)
+    
+    useEffect(() => {
+        console.log(selectedEspacioId);
+        if (selectedEspacioId) {
+            axios.get<Espacio>(`http://localhost:3000/api/espacios/${selectedEspacioId}`)
                 .then(res => setElementos(res.data.elementos))
                 .catch(() => notify('Error cargando elementos', { type: 'error' }));
         }
-    };
+    }, [selectedEspacioId]);
 
     const validateReserva = async (values: ReservaFormValues) => {
         const errors: Partial<Record<keyof ReservaFormValues, any>> = {};
@@ -109,7 +110,7 @@ export const ReservaCreate = () => {
                 validate={validateReserva}
                 sanitizeEmptyValues
             >
-               <SelectInput
+                <SelectInput
                     source="espacio"
                     label="Espacio"
                     choices={espacios || []}
@@ -117,7 +118,7 @@ export const ReservaCreate = () => {
                     optionValue="id"
                     validate={required()}
                     isLoading={loadingEspacios}
-                    onChange={value => handleEspacioChange(value as string)}
+                    onChange={value => setSelectedEspacioId(value.target.value)}
                 />
                 
                 <SelectArrayInput

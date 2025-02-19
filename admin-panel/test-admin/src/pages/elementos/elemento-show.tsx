@@ -1,7 +1,7 @@
 import { Show, SimpleShowLayout, TextField} from 'react-admin';
 
-const elementoShow = (props: any) => ( 
-    <Show {...props}>
+const elementoShow = () => ( 
+    <Show>
         <SimpleShowLayout>
             <TextField source="name" label="Nombre" />
             <TextField source="quantity" label="Quantity" />
