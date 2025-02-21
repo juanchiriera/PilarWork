@@ -34,7 +34,7 @@ class TimePickerModal extends StatelessWidget {
   List<Widget> buildReservas() {
     List<Widget> reservas = [];
     fetchEspacios().then((value) {
-      value.forEach((element) {
+      for (var element in value) {
         reservas.add(
           ListTile(
             title: Text(element.name),
@@ -42,7 +42,7 @@ class TimePickerModal extends StatelessWidget {
                 'Inicio: ${element.startTime.toString()} - Fin: ${element.endTime.toString()}'),
           ),
         );
-      });
+      }
     });
     return reservas;
   }
