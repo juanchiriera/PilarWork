@@ -7,10 +7,10 @@ const elementoEdit = () => (
             <NumberInput source="quantity" />
             <BooleanInput source="available" />
             <ArrayInput source="elementos"><SimpleFormIterator>
-<TextInput source="name" />
-<NumberInput source="quantity" />
-<BooleanInput source="available" />
-</SimpleFormIterator></ArrayInput>
+                <TextInput source="name" />
+                <NumberInput source="quantity" />
+                <BooleanInput source="available" />
+            </SimpleFormIterator></ArrayInput>
         </SimpleForm>
     </Edit>
 );

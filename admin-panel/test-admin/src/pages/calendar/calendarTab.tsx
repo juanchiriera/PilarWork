@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { ShowButton, CreateButton, useRefresh, DeleteWithConfirmButton  } from 'react-admin';
+import { ShowButton, CreateButton, useRefresh, DeleteWithConfirmButton } from 'react-admin';
 import axios from 'axios';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
-import { Badge, Box, Modal, Typography, Paper, CircularProgress, Stack  } from '@mui/material';
+import { Badge, Box, Modal, Typography, Paper, CircularProgress, Stack } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 dayjs.extend(isBetween);
@@ -32,14 +32,14 @@ const CalendarTab = () => {
             try {
                 const startOfMonth = currentMonth.startOf('month').format('YYYY-MM-DD');
                 const endOfMonth = currentMonth.endOf('month').format('YYYY-MM-DD');
-                
+
                 const response = await axios.get('http://localhost:3000/api/reservas', {
                     params: {
                         fechaInicio: startOfMonth,
                         fechaFin: endOfMonth
                     }
                 });
-                
+
                 setReservations(response.data);
                 setLoading(false);
             } catch (err) {
@@ -66,7 +66,7 @@ const CalendarTab = () => {
 
     const CustomDay = (props: PickersDayProps<Dayjs>) => {
         const { day, ...other } = props;
-        const isReserved = reservations.some(reservation => 
+        const isReserved = reservations.some(reservation =>
             day.isBetween(
                 dayjs(reservation.fechaInicio),
                 dayjs(reservation.fechaFin),
@@ -80,8 +80,8 @@ const CalendarTab = () => {
             setModalOpen(true);
         };
 
-    if (loading) return <CircularProgress sx={{ margin: 'auto' }} />;
-    if (error) return <Typography color="error">{error}</Typography>;
+        if (loading) return <CircularProgress sx={{ margin: 'auto' }} />;
+        if (error) return <Typography color="error">{error}</Typography>;
         return (
             <Badge
                 key={day.toString()}
@@ -95,9 +95,9 @@ const CalendarTab = () => {
                     }} />
                 ) : undefined}
             >
-                <PickersDay 
-                    {...other} 
-                    day={day} 
+                <PickersDay
+                    {...other}
+                    day={day}
                     onClick={handleClick}
                     sx={{
                         '&:hover': {
@@ -114,16 +114,16 @@ const CalendarTab = () => {
     if (error) return <Typography color="error">{error}</Typography>;
 
     return (
-        <Box sx={{ 
+        <Box sx={{
             // maxWidth: 800, 
             width: '100%',
             // margin: 'auto',
             padding: 3
         }}>
             <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                <CreateButton 
+                <CreateButton
                     resource="reservas"
-                    sx={{ 
+                    sx={{
                         backgroundColor: '#4CAF50',
                         '&:hover': { backgroundColor: '#45a049' }
                     }}
@@ -142,14 +142,14 @@ const CalendarTab = () => {
 
                 }}
             />
-            
+
             <Modal
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
                 sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-                <Paper sx={{ 
-                    padding: 3, 
+                <Paper sx={{
+                    padding: 3,
                     width: 400,
                     maxHeight: '60vh',
                     overflow: 'auto'
@@ -157,13 +157,17 @@ const CalendarTab = () => {
                     <Typography variant="h6" gutterBottom>
                         Reservas del {selectedDate?.format('DD/MM/YYYY')}
                     </Typography>
-                    
+
                     {selectedDate && reservations
-                        .filter(r => dayjs(r.fechaInicio).isSame(selectedDate, 'day'))
+                        .filter(r => {
+                            return selectedDate.isBetween(r.fechaInicio, r.fechaFin, 'days')
+                                || selectedDate.isSame(r.fechaInicio, 'days')
+                                || selectedDate.isSame(r.fechaFin, 'days')
+                        })
                         .map(reservation => (
-                            <Paper 
+                            <Paper
                                 key={reservation.id}
-                                sx={{ 
+                                sx={{
                                     mb: 2,
                                     p: 2,
                                     border: '1px solid #e0e0e0',
@@ -178,21 +182,21 @@ const CalendarTab = () => {
                                     <Typography variant="body2">
                                         <strong>Personas:</strong> {reservation.personas.join(', ')}
                                     </Typography>
-                                    
-                                    <Stack 
-                                        direction="row" 
-                                        spacing={1} 
+
+                                    <Stack
+                                        direction="row"
+                                        spacing={1}
                                         sx={{ mt: 1, justifyContent: 'flex-end' }}
                                     >
-                                        <ShowButton 
+                                        <ShowButton
                                             resource="reservas"
                                             record={reservation}
-                                            sx={{ 
+                                            sx={{
                                                 color: '#2196F3',
                                                 '&:hover': { backgroundColor: '#e3f2fd' }
                                             }}
                                         />
-                                        
+
                                         <DeleteWithConfirmButton
                                             resource="reservas"
                                             record={reservation}
@@ -206,12 +210,12 @@ const CalendarTab = () => {
                                 </Stack>
                             </Paper>
                         ))}
-                    
+
                     {selectedDate && getReservationsForDate(selectedDate).length === 0 && (
                         <Typography variant="body2" color="textSecondary">
                             No hay reservaciones para este día
                         </Typography>
-                        )}
+                    )}
                 </Paper>
             </Modal>
         </Box>

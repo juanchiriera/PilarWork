@@ -1,4 +1,4 @@
-import { Admin, Resource} from 'react-admin';
+import { Admin, Resource } from 'react-admin';
 import { Layout } from './Layout';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -17,17 +17,20 @@ import elementosShow from './pages/elementos/elemento-show';
 import reservasShow from './pages/reservas/reserva-show';
 import CalendarTab from './pages/calendar/calendarTab';
 import { ReservaCreate } from './pages/reservas/reserva-create';
+import precioList from './pages/precios/precio-list';
+import precioShow from './pages/precios/precio-show';
+import { PrecioCreate } from './pages/precios/precio-create';
 
 
 export const App = () => (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Admin layout={Layout} dataProvider={dataProvider}>
-            <Resource name="espacios" list={espaciosList} show= {espacioShow} edit= {espacioEdit} create={espacioCreate}/>
-            <Resource name="clientes" list={clientesList} show={clientesShow} edit={clienteEdit} create={clienteCreate}/>
-            <Resource name="elementos" list={elementosList} edit={elementoEdit} show={elementosShow}/>
-            <Resource name="reservas" list={CalendarTab} show={reservasShow} create={ReservaCreate}/>
+            <Resource name="espacios" list={espaciosList} show={espacioShow} edit={espacioEdit} create={espacioCreate} />
+            <Resource name="clientes" list={clientesList} show={clientesShow} edit={clienteEdit} create={clienteCreate} />
+            <Resource name="elementos" list={elementosList} edit={elementoEdit} show={elementosShow} create={espacioCreate} />
+            <Resource name="reservas" list={CalendarTab} show={reservasShow} create={ReservaCreate} />
+            <Resource name="precios" list={precioList} show={precioShow} create={PrecioCreate} />
         </Admin>
     </LocalizationProvider>
 );
 
-    

@@ -24,12 +24,12 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: PreferredSize(
         preferredSize:
-            const Size.fromHeight(110), // Aumentar altura para el divider
+            const Size.fromHeight(110),
         child: Container(
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.3),
+                color: const Color.fromARGB(255, 158, 158, 158),
                 spreadRadius: 2,
                 blurRadius: 8,
                 offset: const Offset(0, 3),
