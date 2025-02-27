@@ -20,6 +20,7 @@ import { ReservaCreate } from './pages/reservas/reserva-create';
 import precioList from './pages/precios/precio-list';
 import precioShow from './pages/precios/precio-show';
 import { PrecioCreate } from './pages/precios/precio-create';
+import elementoCreate from './pages/elementos/elemento-create';
 
 
 export const App = () => (
@@ -27,7 +28,7 @@ export const App = () => (
         <Admin layout={Layout} dataProvider={dataProvider}>
             <Resource name="espacios" list={espaciosList} show={espacioShow} edit={espacioEdit} create={espacioCreate} />
             <Resource name="clientes" list={clientesList} show={clientesShow} edit={clienteEdit} create={clienteCreate} />
-            <Resource name="elementos" list={elementosList} edit={elementoEdit} show={elementosShow} create={espacioCreate} />
+            <Resource name="elementos" list={elementosList} edit={elementoEdit} show={elementosShow} create={elementoCreate} />
             <Resource name="reservas" list={CalendarTab} show={reservasShow} create={ReservaCreate} />
             <Resource name="precios" list={precioList} show={precioShow} create={PrecioCreate} />
         </Admin>

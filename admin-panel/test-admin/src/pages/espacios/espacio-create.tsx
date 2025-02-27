@@ -1,4 +1,4 @@
-import { Create, SimpleForm, TextInput, NumberInput, SelectArrayInput, useNotify, useRedirect, required, useGetList, useRefresh } from 'react-admin';
+import { Create, SimpleForm, TextInput, NumberInput, SelectArrayInput, useNotify, useRedirect, required, useGetList, useRefresh, BooleanInput } from 'react-admin';
 import axios from 'axios';
 
 const espacioCreate = () => {
@@ -53,6 +53,12 @@ const espacioCreate = () => {
                     label="Cantidad disponible"
                     validate={required()}
                     min={1}
+                    fullWidth
+                />
+
+                <BooleanInput
+                    source="available"
+                    label="Disponible"
                     fullWidth
                 />
 

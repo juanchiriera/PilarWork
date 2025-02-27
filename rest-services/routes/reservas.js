@@ -55,7 +55,7 @@ router.delete('/reservas/:id', async (req, res) => {
 
 
 router.get('/reservas', async (req, res) => {
-    const { fechaInicio, fechaFin, fechaSeleccionada } = req.query;
+    const { fechaInicio, fechaFin, fechaSeleccionada, elementos } = req.query;
     if (fechaSeleccionada) {
         Reserva.find({ fecha: fechaSeleccionada }).populate('elementos').populate('clientes').exec((err, reservas) => {
             if (err) {
@@ -71,7 +71,7 @@ router.get('/reservas', async (req, res) => {
         }
 
         try {
-            const reservas = await Reserva.find({
+            const filters = {
                 fechaInicio: {
                     $gte: new Date(fechaInicio),
                     $lte: new Date(fechaFin)
@@ -80,7 +80,14 @@ router.get('/reservas', async (req, res) => {
                     $gte: new Date(fechaInicio),
                     $lte: new Date(fechaFin)
                 }
-            }).populate('elementos').populate('clientes');
+            };
+
+            if (elementos && elementos.length > 0) {
+                filters.elementos = {
+                    $in: elementos
+                };
+            }
+            const reservas = await Reserva.find(filters).populate('elementos').populate('clientes');
 
             for (let reserva of reservas) {
                 await reserva.populateEspacio();

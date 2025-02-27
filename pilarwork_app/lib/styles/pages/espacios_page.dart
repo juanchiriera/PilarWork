@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:pilarwork_app/model/espacio_model.dart';
 import 'package:pilarwork_app/styles/pages/date_picker_page.dart';
 import 'package:intl/intl.dart';
+import 'package:pilarwork_app/views/calendar_view.dart';
 
 class EspaciosPage extends StatefulWidget {
   const EspaciosPage({super.key});
@@ -13,8 +14,8 @@ class EspaciosPage extends StatefulWidget {
 }
 
 class EspaciosPageState extends State<EspaciosPage> {
-  List<Espacio> espacios = [];
-  DateTime _focusedDay = DateTime.now();
+  List<Espacio> espacios = List.empty(growable: true);
+  final DateTime _focusedDay = DateTime.now();
   bool _isRangeSelected = false;
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
@@ -35,7 +36,8 @@ class EspaciosPageState extends State<EspaciosPage> {
         await http.get(Uri.parse('http://localhost:3000/api/espacios'));
     if (response.statusCode == 200) {
       // setState(() {
-      var espaciosList = Espacio.fromJsonList(json.decode(response.body));
+      var jsonBody = json.decode(response.body);
+      var espaciosList = Espacio.fromJsonList(jsonBody);
       return espaciosList;
       // });
     } else {
@@ -374,7 +376,7 @@ class EspaciosPageState extends State<EspaciosPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Nuestros Espacios'),
+        title: Text('Elegi un espacio'),
       ),
       body: espacios.isEmpty
           ? Center(child: CircularProgressIndicator())
@@ -392,7 +394,7 @@ class EspaciosPageState extends State<EspaciosPage> {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                DatePickerPage(espacio: espacio)),
+                                CalendarDisplay(onDateSelected: (date) {}, espacio: espacio)),
                       );
                     },
                   ),

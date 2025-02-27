@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pilarwork_app/views/reservas_usuario_view.dart';
 import 'espacios_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -13,18 +14,17 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   final List<Widget> _pages = [
-    const Center(child: Text('Home')),
+    const Center(child: ReservasUsuarioView()),
     const Center(child: Text('Perfil')),
     const Center(child: Text('Crear Reserva')),
-    const Center(child: Text('Espacios')),
+    const Center(child: EspaciosPage()),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize:
-            const Size.fromHeight(110),
+        preferredSize: const Size.fromHeight(110),
         child: Container(
           decoration: BoxDecoration(
             boxShadow: [
@@ -92,14 +92,18 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildFloatingButton() {
-    return FloatingActionButton.large(
-      onPressed: () => setState(() => _currentIndex = 2),
+    return FloatingActionButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => EspaciosPage()),
+        );
+      },
       backgroundColor: Colors.blue,
+      shape: CircleBorder(),
       child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('Crear Reserva', style: TextStyle(fontSize: 14)),
-        ],
+        children: [Icon(Icons.event)],
       ),
     );
   }

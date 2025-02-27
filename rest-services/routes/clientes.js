@@ -3,7 +3,7 @@ const router = Router()
 import Cliente from '../models/Cliente.js'
 
 router.post('/clientes', async (req, res) => {
-       Cliente = new Cliente({
+       const cliente = new Cliente({
             name: req.body.name,
             surname: req.body.surname,
             email: req.body.email,

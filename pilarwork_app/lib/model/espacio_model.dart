@@ -23,8 +23,12 @@ class Espacio {
       name: json['name'],
       quantity: json['quantity'],
       available: json['available'],
-      elementos: List<String>.from(json['elementos'].map((x) => x.toString())),
-      reservas: List<String>.from(json['reservas'].map((x) => x.toString())),
+      elementos: json['elementos'] != null
+          ? List<String>.from(json['elementos'].map((x) => x.toString()))
+          : [],
+      reservas: json['reservas'] != null
+          ? List<String>.from(json['reservas'].map((x) => x.toString()))
+          : [],
       // descripcion: json['descripcion'],
     );
   }

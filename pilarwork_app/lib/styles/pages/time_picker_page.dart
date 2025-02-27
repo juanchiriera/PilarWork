@@ -22,7 +22,7 @@ class TimePickerModal extends StatelessWidget {
       return [
         Reserva(
             id: "1",
-            name: "prueba",
+            espacio: "prueba",
             startTime: DateTime.now(),
             endTime: DateTime.now().add(Duration(hours: 1)))
       ];
@@ -37,7 +37,7 @@ class TimePickerModal extends StatelessWidget {
       for (var element in value) {
         reservas.add(
           ListTile(
-            title: Text(element.name),
+            // title: Text(element.name),
             subtitle: Text(
                 'Inicio: ${element.startTime.toString()} - Fin: ${element.endTime.toString()}'),
           ),

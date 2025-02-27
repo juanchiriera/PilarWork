@@ -6,22 +6,6 @@ import Elemento from '../models/Elemento.js';
 router.post('/espacios', async (req, res) => {
     try {
         const newEspacio = new Espacio(req.body);
-
-        if (req.body.elementos && req.body.elementos.length > 0) {
-            newEspacio.elementos = [];
-
-            for (const elementoData of req.body.elementos) {
-                const newElemento = new Elemento({
-                    name: elementoData.name,
-                    quantity: elementoData.quantity,
-                    available: elementoData.available,
-                });
-
-                const savedElemento = await newElemento.save();
-                newEspacio.elementos.push(savedElemento._id);
-            }
-        }
-
         const savedEspacio = await newEspacio.save();
 
         const populatedEspacio = await Espacio.findById(savedEspacio._id).populate('elementos');
@@ -51,21 +35,22 @@ router.put('/espacios/:id', async (req, res) => {
             return res.status(404).json({ message: 'Espacio no encontrado' });
         }
 
-        if (updatedData.elementos && updatedData.elementos.length > 0) {
-            updatedEspacio.elementos = [];
+        // TODO: Esto esta creando nuevos elementos cada vez que se modifica el espacio
+        // if (updatedData.elementos && updatedData.elementos.length > 0) {
+        //     updatedEspacio.elementos = [];
 
-            for (const elementoData of updatedData.elementos) {
-                const newElemento = new Elemento({
-                    name: elementoData.name,
-                    quantity: elementoData.quantity,
-                    available: elementoData.available,
-                });
+        //     for (const elementoData of updatedData.elementos) {
+        //         const newElemento = new Elemento({
+        //             name: elementoData.name,
+        //             quantity: elementoData.quantity,
+        //             available: elementoData.available,
+        //         });
 
-                const savedElemento = await newElemento.save();
+        //         const savedElemento = await newElemento.save();
 
-                updatedEspacio.elementos.push(savedElemento._id);
-            }
-        }
+        //         updatedEspacio.elementos.push(savedElemento._id);
+        //     }
+        // }
 
         const savedUpdatedEspacio = await updatedEspacio.save();
 

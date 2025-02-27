@@ -1,12 +1,12 @@
 class Reserva {
   final String id;
-  final String name;
+  final String espacio;
   final DateTime startTime;
   final DateTime endTime;
 
   Reserva({
     required this.id,
-    required this.name,
+    required this.espacio,
     required this.startTime,
     required this.endTime,
   });
@@ -14,9 +14,10 @@ class Reserva {
   factory Reserva.fromJson(Map<String, dynamic> json) {
     return Reserva(
       id: json['id'],
-      name: json['name'],
-      startTime: DateTime.parse(json['startTime']),
-      endTime: DateTime.parse(json['endTime']),
+      // name: json['name'],
+      startTime: DateTime.parse(json['fechaInicio']),
+      endTime: DateTime.parse(json['fechaFin']),
+      espacio: json['espacio'],
     );
   }
 

@@ -3,14 +3,14 @@ const router = Router()
 import Elemento from '../models/Elemento.js'
 
 router.post('/elementos', async (req, res) => {
-    Elemento = new Elemento({
+    const elemento = new Elemento({
         name: req.body.name,
         quantity: req.body.quantity,
-        available: req.body.available,
+        available: req.body.available || true,
     })
 
     try {
-        const elementosToSave = await Elemento.save();
+        const elementosToSave = await elemento.save();
         res.status(200).json(elementosToSave)
     }
     catch (error) {

@@ -10,6 +10,7 @@ dayjs.extend(isBetween);
 
 
 interface Reservation {
+    espacio: string;
     id: string;
     personas: string[];
     fechaInicio: string;
@@ -176,13 +177,18 @@ const CalendarTab = () => {
                                 }}
                             >
                                 <Stack direction="column" spacing={1}>
+                                    <Typography variant="body1">
+                                        <strong>{reservation.espacio}</strong> 
+                                    </Typography>
                                     <Typography variant="body2">
                                         <strong>Horario:</strong> {dayjs(reservation.fechaInicio).format('HH:mm')} - {dayjs(reservation.fechaFin).format('HH:mm')}
                                     </Typography>
-                                    <Typography variant="body2">
+                                    {reservation.personas.length > 0 && (
+                                        <Typography variant="body2">
                                         <strong>Personas:</strong> {reservation.personas.join(', ')}
                                     </Typography>
-
+                                    )}
+                                    
                                     <Stack
                                         direction="row"
                                         spacing={1}
