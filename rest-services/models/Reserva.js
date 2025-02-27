@@ -1,5 +1,5 @@
 import mongoose, {Schema} from "mongoose";
-
+import Espacio from "./Espacio.js";
 const ReservaSchema = new Schema({
     personas: [{
         required: true,
@@ -27,6 +27,17 @@ const ReservaSchema = new Schema({
 ReservaSchema.virtual('id').get(function () {
     return this._id.toHexString();
 });
+
+ReservaSchema.virtual('espacio');
+
+// Custom method to populate 'espacio'
+ReservaSchema.methods.populateEspacio = async function () {
+    // Custom query to populate 'espacio'
+    var espacio = await Espacio.findOne({
+        elementos: { $all: this.elementos }
+    });
+    this.espacio =  espacio.name;
+};
 
 // Ensure virtual fields are serialized
 ReservaSchema.set('toJSON', {

@@ -82,6 +82,10 @@ router.get('/reservas', async (req, res) => {
                 }
             }).populate('elementos').populate('clientes');
 
+            for (let reserva of reservas) {
+                await reserva.populateEspacio();
+            }
+
             res.status(200).json(reservas);
         } catch (error) {
             res.status(400).json({ message: error.message });
