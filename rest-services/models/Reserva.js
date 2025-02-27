@@ -1,5 +1,6 @@
 import mongoose, {Schema} from "mongoose";
 import Espacio from "./Espacio.js";
+
 const ReservaSchema = new Schema({
     personas: [{
         required: true,

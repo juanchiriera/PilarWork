@@ -20,13 +20,15 @@ import espaciosRoutes from './routes/espacios.js';
 import clienteRoutes from './routes/clientes.js';
 import elementosRoutes from './routes/elementos.js';
 import reservaRoutes from './routes/reservas.js';
-import precioRoutes from './routes/Precios.js'
+import precioRoutes from './routes/precios.js'
+import alquilerRoutes from './routes/alquileres.js'
 
 app.use('/api', espaciosRoutes)
 app.use('/api', clienteRoutes)
 app.use('/api', elementosRoutes)
 app.use('/api', reservaRoutes)
 app.use('/api', precioRoutes)
+app.use('/api', alquilerRoutes)
 
 connect(mongoString);
 const database = connection

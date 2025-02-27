@@ -21,42 +21,26 @@ router.put('/espacios/:id', async (req, res) => {
         const espacioId = req.params.id;
         const updatedData = req.body;
 
+        if (updatedData.elementos) {
+            updatedData.elementos = updatedData.elementos.map(e => e.id || e);
+        }
+
         const updatedEspacio = await Espacio.findByIdAndUpdate(
-            espacioId, 
+            espacioId,
             {
                 name: updatedData.name,
                 quantity: updatedData.quantity,
                 available: updatedData.available,
-            }, 
-            { new: true }
-        );
+                elementos: updatedData.elementos,
+            },
+            { new: true } // Devuelve el documento actualizado
+        ).populate('elementos'); // Populate aquí para evitar una consulta adicional
 
         if (!updatedEspacio) {
             return res.status(404).json({ message: 'Espacio no encontrado' });
         }
 
-        // TODO: Esto esta creando nuevos elementos cada vez que se modifica el espacio
-        // if (updatedData.elementos && updatedData.elementos.length > 0) {
-        //     updatedEspacio.elementos = [];
-
-        //     for (const elementoData of updatedData.elementos) {
-        //         const newElemento = new Elemento({
-        //             name: elementoData.name,
-        //             quantity: elementoData.quantity,
-        //             available: elementoData.available,
-        //         });
-
-        //         const savedElemento = await newElemento.save();
-
-        //         updatedEspacio.elementos.push(savedElemento._id);
-        //     }
-        // }
-
-        const savedUpdatedEspacio = await updatedEspacio.save();
-
-        const populatedEspacio = await Espacio.findById(savedUpdatedEspacio._id).populate('elementos');
-
-        res.status(200).json( populatedEspacio );
+        res.status(200).json(updatedEspacio);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

@@ -13,15 +13,8 @@ const espacioCreate = () => {
 
     const handleSubmit = async (data: any) => {
         try {
-            const newElements = data.nuevosElementos || [];
-            const createdElements = await Promise.all(
-                newElements.map((element: any) =>
-                    axios.post('http://localhost:3000/api/elementos', element)
-                )
-            );
             const allElements = [
                 ...(data.elementos || []),
-                ...createdElements.map(res => res.data.id)
             ];
 
             await axios.post('http://localhost:3000/api/espacios', {
