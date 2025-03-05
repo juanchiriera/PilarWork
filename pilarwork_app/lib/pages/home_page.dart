@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pilarwork_app/views/detalles_usuario_view.dart';
 import 'package:pilarwork_app/views/reservas_usuario_view.dart';
+import 'package:pilarwork_app/widgets/user_data_bar.dart';
 import 'espacios_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -15,7 +17,7 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   final List<Widget> _pages = [
     const Center(child: ReservasUsuarioView()),
-    const Center(child: Text('Perfil')),
+    const Center(child: DetallesUsuarioView()),
     const Center(child: Text('Crear Reserva')),
     const Center(child: EspaciosPage()),
   ];
@@ -39,48 +41,7 @@ class _HomePageState extends State<HomePage> {
           child: AppBar(
             toolbarHeight: 100,
             automaticallyImplyLeading: false,
-            title: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                children: [
-                  Stack(
-                    alignment: Alignment.bottomRight,
-                    children: [
-                      const CircleAvatar(
-                        radius: 40,
-                        backgroundImage: NetworkImage('foto.jpg'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 16),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Marco Tacchino',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          'marcotacchino20@hotmail.com',
-                          style: TextStyle(fontSize: 14),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          '+54 911 1234-5678',
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            title: UserDataBar(),
           ),
         ),
       ),

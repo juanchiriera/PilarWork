@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pilarwork_app/model/espacio_model.dart';
-import 'package:pilarwork_app/styles/pages/time_picker_page.dart';
+import 'package:pilarwork_app/deprecated/time_picker_page.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class DatePickerPage extends StatefulWidget {

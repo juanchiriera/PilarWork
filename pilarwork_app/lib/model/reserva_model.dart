@@ -14,9 +14,8 @@ class Reserva {
   factory Reserva.fromJson(Map<String, dynamic> json) {
     return Reserva(
       id: json['id'],
-      // name: json['name'],
-      startTime: DateTime.parse(json['fechaInicio']),
-      endTime: DateTime.parse(json['fechaFin']),
+      startTime: DateTime.parse(json['fechaInicio']).toLocal(),
+      endTime: DateTime.parse(json['fechaFin']).toLocal(),
       espacio: json['espacio'],
     );
   }

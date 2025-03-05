@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:pilarwork_app/model/reserva_model.dart';
-import 'package:pilarwork_app/widgets/ReservaListTile.dart';
+import 'package:pilarwork_app/widgets/reserva_list_tile.dart';
 
 class ReservasUsuarioView extends StatefulWidget {
   const ReservasUsuarioView({super.key});

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:pilarwork_app/model/espacio_model.dart';
 import 'package:pilarwork_app/model/reserva_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:pilarwork_app/views/nueva_reserva_view.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class CalendarDisplay extends StatefulWidget {
@@ -30,17 +31,24 @@ class _CalendarDisplayState extends State<CalendarDisplay> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Failed to load reservations'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No reservations found'));
+            return Center(child: Text('Hubo un error al cargar las reservas.'));
           } else {
             return SfCalendar(
               view: CalendarView.workWeek,
               dataSource: ReservationsDataSource(snapshot.data!),
+              onSelectionChanged: (details) {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return NuevaReservaView(details.date);
+                  },
+                );
+              },
               timeSlotViewSettings: TimeSlotViewSettings(
-                  startHour: 8,
-                  endHour: 20,
-                  nonWorkingDays: <int>[DateTime.friday, DateTime.saturday]),
+                startHour: 8,
+                endHour: 20,
+                nonWorkingDays: <int>[DateTime.saturday, DateTime.sunday],
+              ),
             );
           }
         },
