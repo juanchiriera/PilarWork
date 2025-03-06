@@ -36,19 +36,40 @@ class _CalendarDisplayState extends State<CalendarDisplay> {
             return SfCalendar(
               view: CalendarView.workWeek,
               dataSource: ReservationsDataSource(snapshot.data!),
+              showCurrentTimeIndicator: true,
               onSelectionChanged: (details) {
                 showModalBottomSheet(
                   context: context,
+                  enableDrag: true,
+                  showDragHandle: true,
                   builder: (BuildContext context) {
-                    return NuevaReservaView(details.date);
+                    return NuevaReservaView(details.date, widget.espacio);
                   },
-                );
+                ).whenComplete(() {
+                  setState(() {});
+                });
               },
               timeSlotViewSettings: TimeSlotViewSettings(
                 startHour: 8,
                 endHour: 20,
                 nonWorkingDays: <int>[DateTime.saturday, DateTime.sunday],
               ),
+              appointmentBuilder: (context, calendarAppointmentDetails) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).disabledColor,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'No disponible',
+                      style: TextStyle(color: Theme.of(context).cardColor),
+                    ),
+                  ),
+                );
+              },
+              headerStyle:
+                  CalendarHeaderStyle(backgroundColor: Colors.transparent),
             );
           }
         },
@@ -81,6 +102,7 @@ class ReservationsDataSource extends CalendarDataSource {
   ReservationsDataSource(List<Reserva> reservas) {
     appointments = reservas;
   }
+
   @override
   DateTime getStartTime(int index) {
     return appointments![index].startTime;
@@ -93,7 +115,7 @@ class ReservationsDataSource extends CalendarDataSource {
 
   @override
   String getSubject(int index) {
-    return appointments![index].espacio;
+    return "No disponible";
   }
 
   @override

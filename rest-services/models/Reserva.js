@@ -14,6 +14,14 @@ const ReservaSchema = new Schema({
         required: true,
         type: Date,
     },
+    titulo: {
+        type: String,
+        required: false
+    },
+    descripcion: {
+        type: String,
+        required: false
+    },
     elementos: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Elemento',
