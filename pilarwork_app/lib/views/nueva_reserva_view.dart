@@ -5,6 +5,9 @@ import 'dart:convert';
 
 import 'package:pilarwork_app/model/espacio_model.dart';
 
+//TODO: No permitir crear una reserva si pisa la fecha/hora de alguna reserva existente.
+// Manejar eso desde el backend, devolver un 401 si la fecha/hora ya está ocupada.
+// Mostrar un mensaje de error en el formulario si la fecha/hora ya está ocupada.
 class NuevaReservaView extends StatefulWidget {
   final DateTime? date;
   final Espacio espacio;

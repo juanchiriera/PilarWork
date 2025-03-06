@@ -37,6 +37,7 @@ class _CalendarDisplayState extends State<CalendarDisplay> {
               view: CalendarView.workWeek,
               dataSource: ReservationsDataSource(snapshot.data!),
               showCurrentTimeIndicator: true,
+              //TODO: No permitir seleccionar fechas anteriores a la actual ni horarios anteriores al actual.
               onSelectionChanged: (details) {
                 showModalBottomSheet(
                   context: context,
