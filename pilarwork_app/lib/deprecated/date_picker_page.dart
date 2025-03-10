@@ -4,7 +4,8 @@ import 'package:pilarwork_app/deprecated/time_picker_page.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class DatePickerPage extends StatefulWidget {
-  const DatePickerPage({super.key, required Espacio espacio});
+  final Espacio espacio;
+  const DatePickerPage({super.key, required this.espacio});
 
   @override
   State<DatePickerPage> createState() => _DatePickerPageState();
@@ -12,13 +13,24 @@ class DatePickerPage extends StatefulWidget {
 
 class _DatePickerPageState extends State<DatePickerPage> {
   DateTime? _selectedDay;
-
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
 
   bool _isSameDay(DateTime? a, DateTime? b) {
     if (a == null || b == null) return false;
     return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  void _showReservationsForDay(DateTime selectedDay) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return TimePickerModal(
+          selectedDay: selectedDay,
+          espacioId: widget.espacio.id,
+        );
+      },
+    );
   }
 
   @override
@@ -39,7 +51,7 @@ class _DatePickerPageState extends State<DatePickerPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CalendarHeader(),
+                const CalendarHeader(),
                 const Divider(),
                 Expanded(
                   child: TableCalendar(
@@ -52,20 +64,17 @@ class _DatePickerPageState extends State<DatePickerPage> {
                     onFormatChanged: (format) => setState(() {
                       _calendarFormat = format;
                     }),
-                    // !_isRangeSelected && _isSameDay(_selectedDay, day),
-                    // rangeStartDay: _isRangeSelected ? _rangeStart : null,
-                    // rangeEndDay: _isRangeSelected ? _rangeEnd : null,
                     calendarStyle: CalendarStyle(
-                      selectedDecoration: BoxDecoration(
+                      selectedDecoration: const BoxDecoration(
                         color: Colors.blue,
                         shape: BoxShape.circle,
                       ),
                       rangeHighlightColor: Colors.blue[100]!,
-                      rangeStartDecoration: BoxDecoration(
+                      rangeStartDecoration: const BoxDecoration(
                         color: Colors.blue,
                         shape: BoxShape.circle,
                       ),
-                      rangeEndDecoration: BoxDecoration(
+                      rangeEndDecoration: const BoxDecoration(
                         color: Colors.blue,
                         shape: BoxShape.circle,
                       ),
@@ -75,28 +84,11 @@ class _DatePickerPageState extends State<DatePickerPage> {
                       ),
                     ),
                     onDaySelected: (selectedDay, focusedDay) {
-                      // TODO: Open a day view calendar to see reservations for the selected date.
-                      // Fetch reservations using GET: /api/reservas?fechaInicio=selectedDay&fechaFin=selectedDay for a range
-                      // or GET: /api/reservas?fechaSeleccionada=selectedDay for a single date.
                       setState(() {
-                        // if (_isRangeSelected) {
-                        //   if (_rangeStart == null ||
-                        //       (_rangeStart != null && _rangeEnd != null)) {
-                        //     _rangeStart = selectedDay;
-                        //     _rangeEnd = null;
-                        //   } else {
-                        //     _rangeEnd = selectedDay;
-                        //   }
-                        // } else {
                         _selectedDay = selectedDay;
-                        // }
                         _focusedDay = focusedDay;
-                        showModalBottomSheet(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return TimePickerModal(selectedDay: selectedDay);
-                            });
                       });
+                      _showReservationsForDay(selectedDay);
                     },
                     onPageChanged: (focusedDay) {
                       setState(() => _focusedDay = focusedDay);
@@ -104,9 +96,7 @@ class _DatePickerPageState extends State<DatePickerPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // _buildSelectedDatesPreview(),
-                const SizedBox(height: 16),
-                // _buildDialogActions(context, espacioId),
+                _buildDialogActions(),
               ],
             ),
           ),
@@ -114,19 +104,40 @@ class _DatePickerPageState extends State<DatePickerPage> {
       ),
     );
   }
+
+  Widget _buildDialogActions() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
+        if (_selectedDay != null)
+          TextButton(
+            onPressed: () => _confirmSelection(),
+            child: const Text('Confirmar'),
+          ),
+      ],
+    );
+  }
+
+  void _confirmSelection() {
+    if (_selectedDay != null) {
+      Navigator.pop(context, _selectedDay);
+    }
+  }
 }
 
 class CalendarHeader extends StatelessWidget {
-  const CalendarHeader({
-    super.key,
-  });
+  const CalendarHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return const Row(
       children: [
         Text(
-          'Que dia te gustaria reservar?',
+          '¿Qué día te gustaría reservar?',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         Spacer(),

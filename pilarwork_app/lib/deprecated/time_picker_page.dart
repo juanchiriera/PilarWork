@@ -1,50 +1,33 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:pilarwork_app/model/reserva_model.dart';
 import 'package:http/http.dart' as http;
 
 class TimePickerModal extends StatelessWidget {
   final DateTime? selectedDay;
+  final String? espacioId;
 
-  const TimePickerModal({super.key, this.selectedDay});
+  const TimePickerModal({super.key, this.selectedDay, this.espacioId});
 
   Future<List<Reserva>> fetchEspacios() async {
-    //TODO: Agregar filtro de espacio y fecha para las reservas
-    final response =
-        await http.get(Uri.parse('http://localhost:3000/api/reservas'));
-    if (response.statusCode == 200) {
-      // setState(() {
-      var espaciosList = Reserva.fromJsonList(json.decode(response.body));
-      return espaciosList;
-      // });
-    } else {
-      return [
-        Reserva(
-            id: "1",
-            espacio: "prueba",
-            startTime: DateTime.now(),
-            endTime: DateTime.now().add(Duration(hours: 1)))
-      ];
-      // throw Exception('Error al cargar los espacios');
-    }
-  }
+    final Map<String, String> queryParams = {
+      if (espacioId != null) 'espacio': espacioId!,
+      if (selectedDay != null) 'fecha': selectedDay!.toIso8601String(),
+    };
 
-  //TODO: Make this widget syncronous
-  List<Widget> buildReservas() {
-    List<Widget> reservas = [];
-    fetchEspacios().then((value) {
-      for (var element in value) {
-        reservas.add(
-          ListTile(
-            // title: Text(element.name),
-            subtitle: Text(
-                'Inicio: ${element.startTime.toString()} - Fin: ${element.endTime.toString()}'),
-          ),
-        );
+    final uri = Uri.parse('http://localhost:3000/api/reservas')
+        .replace(queryParameters: queryParams);
+
+    try {
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        return Reserva.fromJsonList(json.decode(response.body));
       }
-    });
-    return reservas;
+      throw Exception('Error HTTP: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('Error al cargar los espacios: $e');
+    }
   }
 
   @override
@@ -55,13 +38,54 @@ class TimePickerModal extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            Text('Reservas para el dia: ${selectedDay!.toString()}'),
-            ...buildReservas(),
+            Text(
+              selectedDay != null
+                  ? 'Reservas para el día: ${DateFormat('dd/MM/yyyy').format(selectedDay!)}'
+                  : 'Seleccione una fecha',
+            ),
+            Expanded(
+              child: FutureBuilder<List<Reserva>>(
+                future: fetchEspacios(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Error: ${snapshot.error}'),
+                    );
+                  }
+
+                  final reservas = snapshot.data ?? [];
+
+                  return reservas.isEmpty
+                      ? const Center(
+                          child: Text('No hay reservas para este día'))
+                      : ListView.builder(
+                          itemCount: reservas.length,
+                          itemBuilder: (context, index) {
+                            final reserva = reservas[index];
+                            return ListTile(
+                              title: Text(reserva.espacio),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                      'Inicio: ${DateFormat('HH:mm').format(reserva.startTime)}'),
+                                  Text(
+                                      'Fin: ${DateFormat('HH:mm').format(reserva.endTime)}'),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                },
+              ),
+            ),
             ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Cerrar'),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cerrar'),
             ),
           ],
         ),

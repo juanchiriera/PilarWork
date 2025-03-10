@@ -21,7 +21,6 @@ class CalendarDisplay extends StatefulWidget {
 class _CalendarDisplayState extends State<CalendarDisplay> {
   @override
   Widget build(BuildContext context) {
-    var height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Selecciona una fecha'),

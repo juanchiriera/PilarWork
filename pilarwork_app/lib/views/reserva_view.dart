@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pilarwork_app/model/reserva_model.dart';
 import 'package:pilarwork_app/pages/reserva_page.dart';
-import 'package:pilarwork_app/utils/TimeUtils.dart';
+import 'package:pilarwork_app/utils/time_utils.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'package:http/http.dart' as http;
 
 class ReservaView extends StatelessWidget {
   const ReservaView({
@@ -11,6 +12,65 @@ class ReservaView extends StatelessWidget {
   });
 
   final Reserva reserva;
+
+Future<void> _handleCancel(BuildContext context) async {
+  try {
+    final response = await http.delete(
+      Uri.parse('http://localhost:3000/api/reservas/${reserva.id}'),
+    );
+
+    if (response.statusCode == 200) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context, rootNavigator: true).pop();
+        if (Navigator.canPop(context)) {
+          Navigator.of(context).pop();
+        }
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Reserva cancelada exitosamente')),
+          );
+        }
+      });
+    } else {
+      throw Exception('Error al cancelar reserva: ${response.statusCode}');
+    }
+  } catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    }
+  }
+}
+
+  void _showCancelationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar cancelación'),
+          content:
+              const Text('¿Estás seguro de que quieres cancelar esta reserva?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Volver'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                _handleCancel(context);
+              },
+              child: const Text('Cancelar reserva'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +131,27 @@ class ReservaView extends StatelessWidget {
                   ),
                 ),
                 dataSource: MeetingDataSource(reserva),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.cancel_outlined, size: 24),
+                label: const Text(
+                  'Cancelar Reserva',
+                  style: TextStyle(fontSize: 16),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.shade700,
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
+                onPressed: () => _showCancelationDialog(context),
               ),
             ),
           ),
