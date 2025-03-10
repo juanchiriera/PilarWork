@@ -13,7 +13,12 @@ class EspacioListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(espacio.name, style: TextStyle(fontWeight: FontWeight.bold)),
+      title:
+          Text(espacio.name, style: Theme.of(context).textTheme.headlineSmall),
+      subtitle: Text(
+        'Capacidad aproximada: ${espacio.elementos.length} ${espacio.elementos.length == 1 ? 'persona' : 'personas'}',
+        style: Theme.of(context).textTheme.bodyLarge,
+      ),
       onTap: () {
         Navigator.push(
           context,

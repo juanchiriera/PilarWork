@@ -5,7 +5,6 @@ class Espacio {
   final bool available;
   final List<String> elementos;
   final List<String> reservas;
-  // final String descripcion;
 
   Espacio({
     required this.id,
@@ -14,7 +13,6 @@ class Espacio {
     required this.available,
     required this.elementos,
     required this.reservas,
-    // required this.descripcion,
   });
 
   factory Espacio.fromJson(Map<String, dynamic> json) {
@@ -29,7 +27,6 @@ class Espacio {
       reservas: json['reservas'] != null
           ? List<String>.from(json['reservas'].map((x) => x.toString()))
           : [],
-      // descripcion: json['descripcion'],
     );
   }
 

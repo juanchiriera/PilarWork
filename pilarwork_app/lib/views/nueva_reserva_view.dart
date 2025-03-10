@@ -98,7 +98,7 @@ class _NuevaReservaViewState extends State<NuevaReservaView> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0),
+      padding: const EdgeInsets.only(left: 22.0, right: 22.0, bottom: 8.0),
       child: Form(
         key: _formKey,
         child: ListView(
@@ -107,17 +107,26 @@ class _NuevaReservaViewState extends State<NuevaReservaView> {
               'Reservar ${widget.espacio.name}',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            TextFormField(
-              controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Título'),
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Ingrese un título' : null,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: TextFormField(
+                controller: _titleController,
+                decoration:
+                    const InputDecoration(labelText: 'Título de mi reserva'),
+                validator: (value) =>
+                    value?.isEmpty ?? true ? 'Ingrese un título' : null,
+              ),
             ),
-            TextFormField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(labelText: 'Descripción'),
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Ingrese una descripción' : null,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: TextFormField(
+                controller: _descriptionController,
+                maxLines: 2,
+                decoration: const InputDecoration(
+                    labelText: 'Descripción', disabledBorder: InputBorder.none),
+                validator: (value) =>
+                    value?.isEmpty ?? true ? 'Ingrese una descripción' : null,
+              ),
             ),
             _DateTimeSection(
               label: 'Fecha de inicio',
@@ -126,7 +135,7 @@ class _NuevaReservaViewState extends State<NuevaReservaView> {
               onDatePressed: () async {
                 final date = await showDatePicker(
                   context: context,
-                  initialDate: DateTime.now(),
+                  initialDate: _startDate ?? DateTime.now(),
                   firstDate: DateTime(2000),
                   lastDate: DateTime(2101),
                 );
@@ -135,7 +144,8 @@ class _NuevaReservaViewState extends State<NuevaReservaView> {
               onTimePressed: () async {
                 final time = await showTimePicker(
                   context: context,
-                  initialTime: TimeOfDay.now(),
+                  initialTime: _startTime ??
+                      TimeOfDay.fromDateTime(_startDate ?? DateTime.now()),
                 );
                 if (time != null) setState(() => _startTime = time);
               },
@@ -147,7 +157,7 @@ class _NuevaReservaViewState extends State<NuevaReservaView> {
               onDatePressed: () async {
                 final date = await showDatePicker(
                   context: context,
-                  initialDate: DateTime.now(),
+                  initialDate: _endDate ?? DateTime.now(),
                   firstDate: DateTime(2000),
                   lastDate: DateTime(2101),
                 );
@@ -156,7 +166,8 @@ class _NuevaReservaViewState extends State<NuevaReservaView> {
               onTimePressed: () async {
                 final time = await showTimePicker(
                   context: context,
-                  initialTime: TimeOfDay.now(),
+                  initialTime: _endTime ??
+                      TimeOfDay.fromDateTime(_endDate ?? DateTime.now()),
                 );
                 if (time != null) setState(() => _endTime = time);
               },
@@ -208,26 +219,23 @@ class _DateTimeSection extends StatelessWidget {
           children: [
             Expanded(
               child: ListTile(
-                title: const Text('Fecha'),
-                subtitle: Text(date != null
+                title: Text(
+                    time != null ? time!.format(context) : 'Seleccionar hora'),
+                onTap: onTimePressed,
+                trailing: const Icon(Icons.access_time),
+              ),
+            ),
+            Expanded(
+              child: ListTile(
+                title: Text(date != null
                     ? DateFormat('dd/MM/yyyy').format(date!)
                     : 'Seleccionar fecha'),
                 onTap: onDatePressed,
                 trailing: const Icon(Icons.calendar_today),
               ),
             ),
-            Expanded(
-              child: ListTile(
-                title: const Text('Hora'),
-                subtitle: Text(
-                    time != null ? time!.format(context) : 'Seleccionar hora'),
-                onTap: onTimePressed,
-                trailing: const Icon(Icons.access_time),
-              ),
-            ),
           ],
         ),
-        const Divider(),
       ],
     );
   }

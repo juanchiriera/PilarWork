@@ -21,6 +21,7 @@ class CalendarDisplay extends StatefulWidget {
 class _CalendarDisplayState extends State<CalendarDisplay> {
   @override
   Widget build(BuildContext context) {
+    var height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Selecciona una fecha'),
@@ -40,6 +41,7 @@ class _CalendarDisplayState extends State<CalendarDisplay> {
               //TODO: No permitir seleccionar fechas anteriores a la actual ni horarios anteriores al actual.
               onSelectionChanged: (details) {
                 showModalBottomSheet(
+                  isScrollControlled: true,
                   context: context,
                   enableDrag: true,
                   showDragHandle: true,
