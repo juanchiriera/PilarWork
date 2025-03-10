@@ -21,6 +21,8 @@ class _ReservasUsuarioViewState extends State<ReservasUsuarioView> {
     _reservasFuture = _fetchReservas();
   }
 
+  //TODO: Filtrar las reservas por usuario y fecha.
+  //La fecha tiene que ser la semana actual en adelante.
   Future<List<Reserva>> _fetchReservas() async {
     DateTime now = DateTime.now();
     DateTime firstDayOfMonth = DateTime(now.year, now.month, 1);

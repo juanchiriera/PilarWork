@@ -25,22 +25,22 @@ class ReservaView extends StatelessWidget {
             textAlign: TextAlign.left,
             style: Theme.of(context).textTheme.headlineLarge,
           ),
-          if (reserva.titulo.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(
-                reserva.titulo,
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              reserva.titulo.isEmpty ? 'Reserva sin tituloo' : reserva.titulo,
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
-          if (reserva.descripcion.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(
-                reserva.descripcion,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              reserva.descripcion.isEmpty
+                  ? 'La reserva no tiene descripcion'
+                  : reserva.descripcion,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Text(
