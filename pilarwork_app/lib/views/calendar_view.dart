@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:pilarwork_app/model/espacio_model.dart';
 import 'package:pilarwork_app/model/reserva_model.dart';
@@ -37,15 +36,39 @@ class _CalendarDisplayState extends State<CalendarDisplay> {
               view: CalendarView.workWeek,
               dataSource: ReservationsDataSource(snapshot.data!),
               showCurrentTimeIndicator: true,
-              //TODO: No permitir seleccionar fechas anteriores a la actual ni horarios anteriores al actual.
               onSelectionChanged: (details) {
+                final now = DateTime.now();
+                final selectedDate = details.date ?? now;
+                if (selectedDate.isBefore(DateTime(now.year, now.month, now.day))) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content:
+                            Text('No se pueden seleccionar fechas pasadas')),
+                  );
+                  return;
+                }
+
+                if (selectedDate.day == now.day &&
+                    selectedDate
+                        .isBefore(now.add(const Duration(minutes: 1)))) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content:
+                            Text('No se pueden seleccionar horarios pasados')),
+                  );
+                  return;
+                }
                 showModalBottomSheet(
                   isScrollControlled: true,
                   context: context,
                   enableDrag: true,
                   showDragHandle: true,
                   builder: (BuildContext context) {
-                    return NuevaReservaView(details.date, widget.espacio);
+                    return NuevaReservaView(details.date,
+                    widget.espacio,
+                    horaInicio: TimeOfDay.fromDateTime(selectedDate),
+                    horaFin: TimeOfDay.fromDateTime(selectedDate.add(const Duration(hours: 1))),
+                    );
                   },
                 ).whenComplete(() {
                   setState(() {});

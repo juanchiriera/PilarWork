@@ -5,10 +5,28 @@ import Espacio from '../models/Espacio.js';
 
 router.post('/reservas', async (req, res) => {
     try {
+        const existingReservas = await Reserva.find({
+            elementos: { $in: elementos },
+            $or: [
+                {
+                    fechaInicio: { $lt: new Date(fechaFin) },
+                    fechaFin: { $gt: new Date(fechaInicio) }
+                },
+                {
+                    fechaInicio: { $gte: new Date(fechaInicio), $lte: new Date(fechaFin) }
+                }
+            ]
+        });
+
+        if (existingReservas.length > 0) {
+            return res.status(409).json({
+                message: 'Conflicto de horario con reservas existentes',
+                conflicts: existingReservas
+            });
+        }
+
         const newReserva = new Reserva(req.body);
-
         const savedReserva = await newReserva.save();
-
         const populatedReserva = await Reserva.findById(savedReserva._id).populate('elementos').populate('clientes');
 
         await Espacio.findByIdAndUpdate(
@@ -102,7 +120,7 @@ router.get('/reservas', async (req, res) => {
 
 router.get('/reservas/check', async (req, res) => {
     const { elementoId, fechaInicio, fechaFin } = req.query;
-    
+
     const reservas = await Reserva.find({
         elementos: elementoId,
         fechaInicio: {

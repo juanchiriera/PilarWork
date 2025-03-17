@@ -2,17 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 import 'package:pilarwork_app/model/espacio_model.dart';
 
-//TODO: No permitir crear una reserva si pisa la fecha/hora de alguna reserva existente.
-// Manejar eso desde el backend, devolver un 401 si la fecha/hora ya está ocupada.
-// Mostrar un mensaje de error en el formulario si la fecha/hora ya está ocupada.
 class NuevaReservaView extends StatefulWidget {
   final DateTime? date;
   final Espacio espacio;
 
-  const NuevaReservaView(this.date, this.espacio, {super.key});
+  const NuevaReservaView(this.date, this.espacio,
+      {super.key, required TimeOfDay horaInicio, required TimeOfDay horaFin});
 
   @override
   State createState() => _NuevaReservaViewState();
@@ -22,6 +19,9 @@ class _NuevaReservaViewState extends State<NuevaReservaView> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+  bool _hasConflict = false;
+  bool _isPastDate = false;
+  bool _hasInvalidRange = false;
 
   DateTime? _startDate;
   TimeOfDay? _startTime;
@@ -41,6 +41,56 @@ class _NuevaReservaViewState extends State<NuevaReservaView> {
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final now = DateTime.now();
+    final startDateTime = DateTime(
+      _startDate!.year,
+      _startDate!.month,
+      _startDate!.day,
+      _startTime!.hour,
+      _startTime!.minute,
+    );
+
+    final endDateTime = DateTime(
+      _endDate!.year,
+      _endDate!.month,
+      _endDate!.day,
+      _endTime!.hour,
+      _endTime!.minute,
+    );
+
+    if (!endDateTime.isAfter(startDateTime)) {
+      setState(() => _hasInvalidRange = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('La fecha final debe ser posterior a la fecha inicial'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (startDateTime.isBefore(now)) {
+      setState(() => _isPastDate = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No se pueden seleccionar fechas/horas pasadas'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (endDateTime.isBefore(now)) {
+      setState(() => _isPastDate = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('La fecha/hora final no puede ser en el pasado'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     if (_startDate == null ||
         _startTime == null ||
         _endDate == null ||
@@ -50,22 +100,6 @@ class _NuevaReservaViewState extends State<NuevaReservaView> {
       );
       return;
     }
-
-    final DateTime startDateTime = DateTime(
-      _startDate!.year,
-      _startDate!.month,
-      _startDate!.day,
-      _startTime!.hour,
-      _startTime!.minute,
-    );
-
-    final DateTime endDateTime = DateTime(
-      _endDate!.year,
-      _endDate!.month,
-      _endDate!.day,
-      _endTime!.hour,
-      _endTime!.minute,
-    );
 
     try {
       final response = await http.post(
@@ -92,6 +126,16 @@ class _NuevaReservaViewState extends State<NuevaReservaView> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error creando reserva')),
       );
+    }
+  }
+
+  void _resetErrors() {
+    if (_hasConflict || _isPastDate || _hasInvalidRange) {
+      setState(() {
+        _hasConflict = false;
+        _isPastDate = false;
+        _hasInvalidRange = false;
+      });
     }
   }
 
@@ -136,7 +180,7 @@ class _NuevaReservaViewState extends State<NuevaReservaView> {
                 final date = await showDatePicker(
                   context: context,
                   initialDate: _startDate ?? DateTime.now(),
-                  firstDate: DateTime(2000),
+                  firstDate: DateTime.now(),
                   lastDate: DateTime(2101),
                 );
                 if (date != null) setState(() => _startDate = date);
@@ -158,7 +202,7 @@ class _NuevaReservaViewState extends State<NuevaReservaView> {
                 final date = await showDatePicker(
                   context: context,
                   initialDate: _endDate ?? DateTime.now(),
-                  firstDate: DateTime(2000),
+                  firstDate: DateTime.now(),
                   lastDate: DateTime(2101),
                 );
                 if (date != null) setState(() => _endDate = date);
@@ -166,12 +210,16 @@ class _NuevaReservaViewState extends State<NuevaReservaView> {
               onTimePressed: () async {
                 final time = await showTimePicker(
                   context: context,
-                  initialTime: _endTime ??
-                      TimeOfDay.fromDateTime(_endDate ?? DateTime.now()),
+                  initialTime: _endTime ?? TimeOfDay.now(),
                 );
-                if (time != null) setState(() => _endTime = time);
+                if (time != null) {
+                  _resetErrors();
+                  setState(() => _endTime = time);
+                }
               },
             ),
+            if (_hasConflict || _isPastDate || _hasInvalidRange)
+              _buildErrorMessage(),
             const SizedBox(height: 20),
             TextButton(
               style: TextButton.styleFrom(
@@ -186,6 +234,26 @@ class _NuevaReservaViewState extends State<NuevaReservaView> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildErrorMessage() {
+    String message;
+    if (_isPastDate) {
+      message = 'No se permiten reservas en fechas pasadas';
+    } else if (_hasInvalidRange) {
+      message = 'La fecha final debe ser posterior a la inicial';
+    } else {
+      message = 'El horario seleccionado está ocupado';
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        message,
+        style: const TextStyle(color: Colors.red, fontSize: 14),
+        textAlign: TextAlign.center,
       ),
     );
   }
