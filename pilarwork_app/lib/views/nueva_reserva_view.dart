@@ -39,6 +39,7 @@ class _NuevaReservaViewState extends State<NuevaReservaView> {
   }
 
   Future<void> _handleSubmit() async {
+    _resetErrors();
     if (!_formKey.currentState!.validate()) return;
 
     final now = DateTime.now();
@@ -58,36 +59,15 @@ class _NuevaReservaViewState extends State<NuevaReservaView> {
       _endTime!.minute,
     );
 
-    if (!endDateTime.isAfter(startDateTime)) {
+    if (endDateTime.isBefore(startDateTime)) {
       setState(() => _hasInvalidRange = true);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('La fecha final debe ser posterior a la fecha inicial'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showErrorSnack('La fecha final debe ser posterior a la inicial');
       return;
     }
 
-    if (startDateTime.isBefore(now)) {
+    if (startDateTime.isBefore(now) || endDateTime.isBefore(now)) {
       setState(() => _isPastDate = true);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No se pueden seleccionar fechas/horas pasadas'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    if (endDateTime.isBefore(now)) {
-      setState(() => _isPastDate = true);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('La fecha/hora final no puede ser en el pasado'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showErrorSnack('No se permiten reservas en fechas pasadas');
       return;
     }
 
@@ -137,6 +117,15 @@ class _NuevaReservaViewState extends State<NuevaReservaView> {
         _hasInvalidRange = false;
       });
     }
+  }
+
+  void _showErrorSnack(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   @override

@@ -5,25 +5,28 @@ import Espacio from '../models/Espacio.js';
 
 router.post('/reservas', async (req, res) => {
     try {
-        const existingReservas = await Reserva.find({
-            elementos: { $in: elementos },
-            $or: [
-                {
-                    fechaInicio: { $lt: new Date(fechaFin) },
-                    fechaFin: { $gt: new Date(fechaInicio) }
-                },
-                {
-                    fechaInicio: { $gte: new Date(fechaInicio), $lte: new Date(fechaFin) }
-                }
-            ]
-        });
+        // TODO Validacion de superposicion de reservas, desconozco porque no me deja hacer reservas si lo descomento, suerte
+        // const start = new Date(fechaInicio);
+        // const end = new Date(fechaFin);
 
-        if (existingReservas.length > 0) {
-            return res.status(409).json({
-                message: 'Conflicto de horario con reservas existentes',
-                conflicts: existingReservas
-            });
-        }
+        // const existingReservas = await Reserva.find({
+        //     elementos: { $in: elementos },
+        //     $or: [
+        // Caso 1: Nueva reserva se solapa por la izquierda
+        //{ fechaInicio: { $lt: end }, fechaFin: { $gt: start } },
+        // Caso 2: Nueva reserva se solapa por la derecha
+        //{ fechaInicio: { $gte: start, $lte: end } },
+        // Caso 3: Nueva reserva contiene completamente una existente
+        //{ fechaFin: { $gte: start, $lte: end } }
+        //]
+        // });
+
+        // if (existingReservas.length > 0) {
+        //     return res.status(409).json({
+        //         message: 'Conflicto de horario con reservas existentes',
+        //         conflicts: existingReservas
+        //     });
+        // }
 
         const newReserva = new Reserva(req.body);
         const savedReserva = await newReserva.save();

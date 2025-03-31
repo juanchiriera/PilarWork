@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pilarwork_app/pages/login_page.dart';
 import 'package:pilarwork_app/views/detalles_usuario_view.dart';
 import 'package:pilarwork_app/views/reservas_usuario_view.dart';
 import 'package:pilarwork_app/widgets/user_data_bar.dart';
@@ -93,8 +94,12 @@ class _HomePageState extends State<HomePage> {
                 Icons.person,
                 color: _currentIndex == 1 ? Colors.blue : Colors.grey,
               ),
-              onPressed: () => setState(() => _currentIndex = 1),
-            ),
+              onPressed: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginPage()),
+                  );
+                }),
             // Botón Espacios
             const SizedBox(width: 40),
             IconButton(
